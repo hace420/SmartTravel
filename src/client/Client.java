@@ -1,9 +1,8 @@
-import java.util.Scanner;
 package client;
 
 public class Client {
   private static int nextid = 1001;
-  private String clientID;
+  final private String clientID;
   private String firstName;
   private String lastName;
   private String emailAddress;
@@ -21,6 +20,14 @@ public class Client {
     this.firstName = firstName;
     this.lastName = lastName;
     this.emailAddress = emailAddress;
+    this.clientID = "C" + nextid;
+    nextid++;
+  }
+
+  public Client(Client other){
+    this.firstName = other.firstName;
+    this.lastName = other.lastName;
+    this.emailAddress = other.emailAddress;
     this.clientID = "C" + nextid;
     nextid++;
   }
