@@ -1,6 +1,7 @@
 package travel;
 
-public class Transportation {
+
+public abstract class Transportation {
 
   private static int nextId = 3001;
   final private String tripId;
@@ -58,6 +59,11 @@ public class Transportation {
   public String getArrivalCity(){
     return arrivalCity;
   }
+
+  // method to calculate total cost of add-on transport fees
+  public abstract double calculateTotalCost(int numberOfDays);
+
+  
 
   @Override
   public String toString(){
