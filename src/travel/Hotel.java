@@ -1,0 +1,58 @@
+package travel;
+
+public class Hotel extends Accommadation{
+    private int numberOfStars; // rating goes from 1 to 5 (5 being the best)
+    private double serviceFees; // cost that will be added to pricePerNight (fee will only be charged once not per night)
+    
+    // constructors
+    public Hotel(){
+        super();
+        numberOfStars = 0;
+    }
+    public Hotel(String name,String location,double pricePerNight,int numberOfStars,double serviceFees){
+        super(name, location, pricePerNight);
+        this.numberOfStars = numberOfStars;
+        this.serviceFees = serviceFees;
+    }
+    public Hotel(Hotel other){
+        super(other);
+        this.numberOfStars = other.numberOfStars;
+        this.serviceFees = other.serviceFees;
+    }
+
+    // setters
+    public void setNumberOfStars(int numberOfStars){
+        this.numberOfStars = numberOfStars;
+    }
+    public void setServiceFees(double serviceFees){
+        this.serviceFees = serviceFees;
+    }
+
+    // getters
+    public int getNumberOfStars(){
+        return numberOfStars;
+    }
+    public double getServiceFees(){
+        return serviceFees;
+    }
+
+    // calculates total cost service fees are only added at the end not charged daily
+    @Override
+    public double calculateTotalCost(int numberOfDays){
+        return (this.getPricePerNight() * numberOfDays) + serviceFees;
+    }
+
+    @Override
+    public String toString(){
+        return super.toString() +
+                "\nNumber of stars(1-5): " + numberOfStars +
+                "\nService fees: " + serviceFees;
+    }
+    
+
+
+
+
+
+
+}
