@@ -72,8 +72,8 @@ public class Trip {
   public int getDuration() {
     return duration;
   }
-  public String getClient(){
-    return client.toString();
+  public Client getClient(){
+    return client;
   }
 
   // setters
