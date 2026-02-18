@@ -63,7 +63,7 @@ public double getLuggageCost(){
 // number of days not needed as tickets cost is for round trip ticket 
 @Override
 public double calculateTotalCost(int numberOfDays){ 
-    return ticketCost + luggageCost;
+    return  (ticketCost + luggageCost);
 }
 
 @Override

@@ -7,8 +7,10 @@ public class Trip {
   final private String tripId;
   private String destination;
   private int duration;
-  private double basePrice;
-  private Client client;
+  private double basePrice;       // base price for one night
+  private Client client;               
+  private Transportation transportation;
+  private Accommadation accommadation;
 
   // constructors
   public Trip() {
@@ -16,15 +18,19 @@ public class Trip {
     destination = "";
     duration = 0;
     basePrice = 0;
-    client = new Client();
+    this.client =null;
+    this.accommadation = null;
+    this.transportation = null;
     nextId++;
   }
 
-  public Trip(String destination, int duration, double basePrice, Client client) {
+  public Trip(String destination, int duration, double basePrice, Client client,Transportation transportation, Accommadation accommadation) {
     this.destination = destination;
     this.duration = duration;
     this.basePrice = basePrice;
     this.client = client;
+    this.accommadation =accommadation;
+    this.transportation =transportation;
     this.tripId = "T" + nextId;
     nextId++;
   }
@@ -36,10 +42,22 @@ public class Trip {
     this.tripId = "T"+ nextId;
     nextId++;
     this.client = other.client;
+    this.transportation = other.transportation;
+    this.accommadation = other.accommadation;
   }
 
-  public double calculateTotalCost() {
-    return basePrice*duration;
+  public double calculateTotalCost(int numberOfDays) {
+    double total = 0;
+    total = basePrice*duration;
+    if (transportation != null) {
+        total += transportation.calculateTotalCost(numberOfDays);
+    }
+
+    if (accommadation != null) {
+        total += accommadation.calculateTotalCost(numberOfDays);
+    }
+
+    return total;
   }
 
   // getters
@@ -54,6 +72,9 @@ public class Trip {
   public int getDuration() {
     return duration;
   }
+  public String getClient(){
+    return client.toString();
+  }
 
   // setters
   public void setDestination(String destination) {
@@ -67,30 +88,101 @@ public class Trip {
   public void setBasePrice(double basePrice) {
     this.basePrice = basePrice;
   }
+  public void setClient(Client client){
+    this.client = client;
+  }
 
  @Override
- public String toString(){
-  return( "\nTrip id: " + tripId + 
-         "\nDestination: " + destination +
-         "\nDuration: " + duration +
-         "\nBase Price: " + basePrice +
-         "\nTotal cost: "+ this.calculateTotalCost() +
-         "\nClient: " + client);
+public String toString() {
 
- }
-   @Override
-  public boolean equals(Object obj) {
+    String result = "\nTrip id: " + tripId +
+                    "\nDestination: " + destination +
+                    "\nDuration: " + duration +
+                    "\nBase Price: " + basePrice +
+                    "\nTotal Cost: " + calculateTotalCost(duration);
+
+    if (transportation != null) {
+        result += "\n" + transportation.toString();
+    } else {
+        result += "\nTransportation: none";
+    }
+
+    if (accommadation != null) {
+        result += "\n" + accommadation.toString();
+    } else {
+        result += "\nAccommodation: none";
+    }
+
+    if (client != null) {
+        result += "\n" + client.toString();
+    } else {
+        result += "\nClient: none";
+    }
+
+    return result;
+}
+
+  @Override
+public boolean equals(Object obj) {
+
     if (obj == null) {
-      return false;
+        return false;
     }
 
     if (getClass() != obj.getClass()) {
-      return false;
+        return false;
     }
+
     Trip compare = (Trip) obj;
-    if (this.client.equals(compare.client) && this.destination.equalsIgnoreCase(compare.destination) &&
-        this.duration == compare.duration && this.basePrice == compare.basePrice) return true;
-        else return false;
-  }
+
+    // Check client
+    if (this.client == null) {
+        if (compare.client != null) {
+            return false;
+        }
+    } else {
+        if (!this.client.equals(compare.client)) {
+            return false;
+        }
+    }
+
+    // Check transportation
+    if (this.transportation == null) {
+        if (compare.transportation != null) {
+            return false;
+        }
+    } else {
+        if (!this.transportation.equals(compare.transportation)) {
+            return false;
+        }
+    }
+
+    // Check accommodation
+    if (this.accommadation == null) {
+        if (compare.accommadation != null) {
+            return false;
+        }
+    } else {
+        if (!this.accommadation.equals(compare.accommadation)) {
+            return false;
+        }
+    }
+
+    // Check simple fields
+    if (!this.destination.equalsIgnoreCase(compare.destination)) {
+        return false;
+    }
+
+    if (this.duration != compare.duration) {
+        return false;
+    }
+
+    if (this.basePrice != compare.basePrice) {
+        return false;
+    }
+
+    return true;
+}
+
 
 }

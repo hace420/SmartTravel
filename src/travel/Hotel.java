@@ -48,7 +48,23 @@ public class Hotel extends Accommadation{
                 "\nNumber of stars(1-5): " + numberOfStars +
                 "\nService fees: " + serviceFees;
     }
-    
+  
+     @Override
+    public boolean equals(Object obj) {
+    if (obj == null) {
+        return false;
+    }
+
+    if (getClass() != obj.getClass()) {
+        return false;
+    }
+    Hotel compare = (Hotel) obj;
+    if (super.equals(compare) &&
+        this.numberOfStars == compare.numberOfStars &&
+        this.serviceFees == compare.serviceFees) return true;
+        else return false;
+
+  }
 
 
 
