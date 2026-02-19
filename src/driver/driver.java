@@ -25,7 +25,7 @@ public class driver {
         if (menuChoice == 1){
             menuDriven(in);
         } else if (menuChoice ==2){
-            
+            predefinedScenerio(in);
         } else {
             System.out.println("\nInvalid choice!");
         }
@@ -1003,11 +1003,188 @@ public class driver {
     }
 }
 
+    //----------------------------------
+    // Hard Coded testing scenerio 
+    //----------------------------------
+
+    public static void predefinedScenerio(Scanner in){
+        System.out.println("=== Predefined Testing Scenario ===");
+
+        // --- Step 1: Create clients ---
+        Client c1 = new Client("Alice", "Smith", "alice@gmail.com");
+        Client c2 = new Client("Bob", "Bobertson", "bob@outlook.com");
+        Client c3 = new Client("Chris", "Williams", "chris@live.com");
+
+        Client[] testClientArray = new Client[3];  // --- step 4 creating arrays ----
+        testClientArray[0] = c1;
+        testClientArray[1] = c2;
+        testClientArray[2] = c3;
+        int testClientCount = 3;
+
+        // --- Step 1: Create transportation ---
+        Flight f1 = new Flight("airCanada", "Montreal", "Paris", "airCanada", 20, 150, 30);
+        Flight f2 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);
+
+        Train t1 = new Train("Exo", "laval", "Toronto", TrainType.HIGH_SPEED, SeatClass.FIRST_CLASS, 120);
+        Train t2 = new Train("ViaRail", "Moncton", "Detroit", TrainType.LONG_DISTANCE, SeatClass.ECONOMY, 80);
+
+        Bus b1 = new Bus("Exo", "Terrebbonne", "Montreal", "Exo", 3, 23);
+        Bus b2 = new Bus("BusCO", "montreal", "laval", "BusCO", 5, 25);
+
+        Transportation[] tesTransportationsArray = new Transportation[7]; // --- step 4 creating arrays ----
+        tesTransportationsArray[0] = f1; 
+        tesTransportationsArray[1] = f2;
+        tesTransportationsArray[2] = t1; 
+        tesTransportationsArray[3] = t2;
+        tesTransportationsArray[4] = b1; 
+        tesTransportationsArray[5] = b2;
+        int testTransportCount = 7;
+
+        // --- Step 1: Create accommodations ---
+        Hotel h1 = new Hotel("Hilton", "Paris", 100, 4, 20);
+        Hotel h2 = new Hotel("Imperia", "Montreal", 120, 5, 25);
+
+        Hostel hs1 = new Hostel("Auberge du Plateau", "Paris", 50, 3, 10);
+        Hostel hs2 = new Hostel("HostelCo", "Toronto", 60, 4, 15);
+
+        Accommadation[] testAccommadations = new Accommadation[4]; // --- step 4 creating arrays ----
+        testAccommadations[0] = h1; 
+        testAccommadations[1] = h2;
+        testAccommadations[2] = hs1; 
+        testAccommadations[3] = hs2;
+        int testAccommadationCount = 4;
+
+        // --- Step 1: Create trips ---
+        Trip tr1 = new Trip("Paris", 5, 200, c1, f1, h1);
+        Trip tr2 = new Trip("Toronto", 4, 150, c2, t1, hs1);
+        Trip tr3 = new Trip("Montreal", 6, 180, c3, b1, h2);
+
+        Trip[] testTripArray = new Trip[3]; // --- step 4 creating arrays ----
+        testTripArray[0] = tr1; 
+        testTripArray[1] = tr2; 
+        testTripArray[2] = tr3;
+        int testTripCount = 3;
+
+        // --- Display all created objects --- 
+        System.out.println("\n--- Clients ---");
+        for (int i = 0; i < testClientCount; i++) {
+            System.out.println(testClientArray[i]);
+        }
+        System.out.println("\n--- Trips ---");
+        for (int i = 0; i < testTripCount; i++) {
+            System.out.println(testTripArray[i]);
+        }
+        System.out.println("\n--- Transportations ---");
+        for (int i = 0; i < testTransportCount; i++) System.out.println(tesTransportationsArray[i]);
+
+        System.out.println("\n--- Accommodations ---");
+        for (int i = 0; i < testAccommadationCount; i++) System.out.println(testAccommadations[i]);
+
+        // --- testing equals method ---
+
+        // Compare objects from different classes.
+        System.out.println("----------------------testing equals method--------------------------");
+        System.out.println("Client vs Trip:\n");
+        System.out.println(c1.toString()+"\n"+tr1.toString());
+        System.out.println("\nequals method on these 2 object is: "+c1.equals(tr1));   
+
+        // Compare objects of the same class with different attributes
+        System.out.println("\nTwo Flights with different attributes:");
+        System.out.println(f1.toString()+"\n"+f2.toString());
+        System.out.println("\nequals method on these 2 object is: "+f1.equals(f2)); 
+
+        // Compare objects of the same class with identical attributes
+        Flight f3 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);// creating copy of f2 to compare against
+        tesTransportationsArray[6] = f3;
+        System.out.println("\nTwo Flights with identical attributes:");
+        System.out.println(f2.toString()+"\n"+f3.toString());
+        System.out.println("\nequals method on these 2 object is: "+f2.equals(f3));
+
+        // --- Demonstrating Polymorphism ---
+        
+        System.out.println("\n--- Polymorphic Total Cost Calculations ---");
+
+        for (int i = 0; i < testTripArray.length; i++) {
+            Trip trip = testTripArray[i];
+
+            // Using base-class references
+            Transportation transport = trip.getTransportation(); // Flight, Train, or Bus
+            Accommadation accommodation = trip.getAccommadation(); // Hotel or Hostel
+
+            double transportCost = transport.calculateTotalCost(trip.getDuration());
+            double accommodationCost = accommodation.calculateTotalCost(trip.getDuration());
+            double totalCost = transportCost + accommodationCost;
+
+            System.out.println("Trip to " + trip.getDestination() + " for client " + trip.getClient().getFirstName());
+            System.out.println( transport + " -> Cost: " + transportCost);
+            System.out.println( accommodation + " -> Cost: " + accommodationCost);
+            System.out.println("Total Trip Cost: " + totalCost + "\n");
+        }
+
+        // --- Displaying most Expensive "test" trip ---
+        System.out.println("\n------ Displaying most Expensive test trip ------");
+        Trip expensiveTrip = testTripArray[0];
+                double highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                for (int i =0; i < testTripCount;i++){
+                    double tempCost = testTripArray[i].calculateTotalCost(testTripArray[i].getDuration());
+                    if (tempCost > highestCost){
+                        highestCost =tempCost;
+                        expensiveTrip = testTripArray[i];
+                    }
+                }
+                System.out.println("Most expensive trip: \n" + expensiveTrip.toString());
+                System.out.println("With a cost of: " + highestCost);       
+        
+        
+        // --- deep copy of the transportation array. Modify at least one object in the copied array Display both arrays to demonstrate that the original array is unchanged. ---
+        System.out.println("\n------ deep copy of the transportation array ------");
+        Transportation[] copyTransportations = new Transportation[testTransportCount];
+                for (int i =0;i<testTransportCount;i++){
+                    if (tesTransportationsArray[i] instanceof Flight){
+                        Flight flightTemp = (Flight) tesTransportationsArray[i];
+                        copyTransportations[i] = new Flight(flightTemp);
+                    } else if (tesTransportationsArray[i] instanceof Train){
+                        Train trainTemp = (Train) tesTransportationsArray[i];
+                        copyTransportations[i] = new Train(trainTemp);
+                    }else if (tesTransportationsArray[i] instanceof Bus){
+                        Bus busTemp = (Bus) tesTransportationsArray[i];
+                        copyTransportations[i] = new Bus(busTemp);
+                    }
+
+                }
+             
+                copyTransportations[1].setArrivalCity("Berlin");
+                copyTransportations[1].setDepartureCity("Vancouver");
+                copyTransportations[1].setCompanyName("AirplaneCo");
+                System.out.println("\n------Original-------");
+                for (int i = 0; i < testTransportCount; i++) System.out.println(tesTransportationsArray[i]); // display original array
+                System.out.println("\n------Modified-------");
+                for (int i = 0; i < testTransportCount; i++) System.out.println(copyTransportations[i]);    // display modified array
+                
 
 
 
 
-}
+    }
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
 
 
 

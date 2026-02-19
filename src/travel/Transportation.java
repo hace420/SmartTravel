@@ -67,7 +67,7 @@ public abstract class Transportation {
 
   @Override
   public String toString(){
-    return ("Trip id: " + tripId +
+    return ("\nTransport id: " + tripId +
             "\nCompany name: " + companyName + 
             "\nDeparture City: " + departureCity +
             "\nArrival City: " + arrivalCity);
