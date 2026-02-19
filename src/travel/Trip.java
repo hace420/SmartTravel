@@ -75,6 +75,13 @@ public class Trip {
   public Client getClient(){
     return client;
   }
+  public Transportation getTransportation(){
+    return transportation;
+  }
+  public Accommadation getAccommadation(){
+    return accommadation;
+  }
+
 
   // setters
   public void setDestination(String destination) {
@@ -90,6 +97,12 @@ public class Trip {
   }
   public void setClient(Client client){
     this.client = client;
+  }
+  public void setTransportation(Transportation transportation){
+    this.transportation = transportation;
+  }
+  public void setAccommadation(Accommadation accommadation){
+    this.accommadation = accommadation;
   }
 
  @Override

@@ -1,7 +1,7 @@
 package driver;
-import travel.*;
 import client.*;
 import java.util.Scanner;
+import travel.*;
 
 public class driver {
     private static Client[] clients = new Client[50];       // initializing arrays for storing information
@@ -179,13 +179,7 @@ public class driver {
 
     } while (choiceClient != 5);
     } 
-    public static void listClients(){
-        System.out.println("Clients list:");
-        for (int i = 0; i < clientCount; i++) {
-        System.out.println(i + ". " + clients[i].getFirstName() + " " + clients[i].getLastName() + " " + clients[i].getEmailAddress());
-        }
-    }  
-
+  
 
     //----------------------------------
     // TRIP MENU
@@ -301,8 +295,13 @@ public class driver {
                                 transport = new Bus(company, depart, arrive, n, stops, c);
                                 break;
                                 }
-                             transportations[transportCount] = transport;
-                             transportCount++;
+                            if (transportCount < transportations.length){
+                                 transportations[transportCount] = transport;
+                                 transportCount++;
+                            } else {
+                                System.out.println("No more trips can be entered the list is full");
+                            }
+                            
 
                         }
                 
@@ -346,8 +345,12 @@ public class driver {
                         default:
                             System.out.println("Invalid option!");break;
                     }
-                    accommadations[accommadationCount] = acc;
-                    accommadationCount++;
+                    if (accommadationCount < accommadations.length){
+                        accommadations[accommadationCount] = acc;
+                        accommadationCount++;
+                    } else {
+                        System.out.println("Accommodation list full cannot add more");
+                    }
 
                 }
                 if (tripCount < trips.length) {
@@ -452,12 +455,43 @@ public class driver {
                
                 tripCount--;
                 System.out.println("Trip deleted successfully!");
+                break;
 
             case 4:
                 listTrips();break;
-            case 5:              
-
-
+            case 5:   
+            listClients();
+            System.out.println("Enter index of client to search for");
+            int searchIndex = in.nextInt();
+            in.nextLine();
+            if (searchIndex < 0 || searchIndex >= clientCount){
+                System.out.println("Invalid entry!");
+                break;
+            }
+            if (tripCount == 0 ) {
+                System.out.println("No trips found");
+                break;
+            } 
+            if (clientCount == 0 ) {
+                System.out.println("No clients found");
+                break;
+            }  
+            
+            boolean found = false;
+            Client selectedClient1 = clients[searchIndex];
+            System.out.println("Trips found for client "+ clients[searchIndex].toString());
+            for (int i = 0; i < tripCount;i++ ){
+                if (trips[i].getClient() == selectedClient1) {
+                    System.out.println("Destonation: " + trips[i].getDestination()+
+                                        "\nDuration: " + trips[i].getDuration()+
+                                        "\nPrice: "+ trips[i].calculateTotalCost(trips[i].getDuration()));
+                                        found = true;
+                }
+            }
+            if (!found){
+                System.out.println("No trips found for that client");
+            }
+            break;
             default:
                     System.out.println("Invalid entry!");;
 
@@ -468,32 +502,509 @@ public class driver {
 
    
     }
+    
+
+    //----------------------------------
+    // TRANSPORTATION MENU
+    //----------------------------------
+    public static void transportationMenu(Scanner in){
+        System.out.println("1. Add a transportation option");
+        System.out.println("2. Remove a transportation option");
+        System.out.println("3. List transportations by type");
+        int menuChoice = in.nextInt();
+        in.nextLine();
+        switch (menuChoice) {
+            case 1:
+                // --- adding trips ---
+                if (tripCount == 0) {
+                 System.out.println("No trips available to add transportation.");
+                 return;
+                }
+
+                    System.out.println("Select trip you would like to add transportation to:");
+                    listTrips();
+                    int tripIndex = in.nextInt();
+                    in.nextLine();
+
+                    if (tripIndex < 0 || tripIndex >= tripCount) {
+                        System.out.println("Invalid trip selection!");
+                        return;
+                    }
+
+                    Trip selectedTrip = trips[tripIndex];
+                    Transportation transport = null;
+
+                    // --- choosing tranport type --- 
+                    System.out.println("Select transportation type: 1. Flight 2. Train 3. Bus");
+                    int transportType = in.nextInt();
+                    in.nextLine();
+
+                    System.out.print("Enter company name: ");
+                    String company = in.nextLine();
+                    System.out.print("Enter departure city: ");
+                    String depart = in.nextLine();
+                    System.out.print("Enter arrival city: ");
+                    String arrive = in.nextLine();
+
+                switch (transportType) {
+                    case 1:
+                        // flight - attributes
+                        System.out.print("Enter airline name: ");
+                        String airline = in.nextLine();
+                        System.out.print("Enter luggage allowance: ");
+                        double luggage = in.nextDouble();
+                        System.out.print("Enter ticket cost: ");
+                        double ticketCost = in.nextDouble();
+                        System.out.print("Enter luggage cost: ");
+                        double luggageCost = in.nextDouble();
+                        in.nextLine();
+                        transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                        break;
+
+                    case 2:
+                        // train - attributes
+                        System.out.println("Enter train type (1. High-speed 2. Long-Distance 3. Economy)");
+                        int type = in.nextInt();
+                        TrainType trainType = TrainType.ECONOMY;
+                        switch (type) {
+                            case 1: trainType = TrainType.HIGH_SPEED; break;
+                            case 2: trainType = TrainType.LONG_DISTANCE; break;
+                            case 3: trainType = TrainType.ECONOMY; break;
+                        }
+                        System.out.println("Enter seat class (1. First class 2. Business 3. Economy)");
+                        int seat = in.nextInt();
+                        SeatClass seatclass = SeatClass.ECONOMY;
+                        switch (seat) {
+                            case 1: seatclass = SeatClass.FIRST_CLASS; break;
+                            case 2: seatclass = SeatClass.BUSINESS; break;
+                            case 3: seatclass = SeatClass.ECONOMY; break;
+                        }
+                        System.out.println("Enter train cost:");
+                        double cost = in.nextDouble();
+                        in.nextLine();
+                        transport = new Train(company, depart, arrive, trainType, seatclass, cost);
+                        break;
+
+                    case 3:
+                        // bus - attributes
+                        System.out.print("Enter bus company name: ");
+                        String busName = in.nextLine();
+                        System.out.print("Enter number of stops: ");
+                        int stops = in.nextInt();
+                        System.out.print("Enter bus cost (base 20$ + 1$ per stop): ");
+                        double busCost = in.nextDouble();
+                        in.nextLine();
+                        transport = new Bus(company, depart, arrive, busName, stops, busCost);
+                        break;
+
+                        default:
+                        System.out.println("Invalid transportation type!");
+                        return;
+                    }
+
+                    // Add transport to global array (
+                    if (transportCount < transportations.length) {
+                        transportations[transportCount++] = transport;
+                    } else {
+                        System.out.println("Transportation list is full!");
+                    }
+
+                    // adding transport to trip
+                    selectedTrip.setTransportation(transport); 
+
+                    System.out.println("Transportation added to trip successfully!");
+                   
+                    break;
+            case 2:
+                // remove a transport option
+                if (transportCount == 0){
+                    System.out.println("No transportations options available to remove");break;
+                }
+                System.out.println("Select index of trip you would like to remove transportation from");
+                listTrips();
+                int tripRemoveIndex = in.nextInt();
+                in.nextLine();
+                if (tripRemoveIndex <  0 || tripRemoveIndex >= tripCount){
+                    System.out.println("Invalid index entered!");return;
+                }
+                Trip tripToRemoveTransport = trips[tripRemoveIndex];
+
+                if (tripToRemoveTransport.getTransportation() == null) {
+                    System.out.println("This trip has no transportation assigned.");break;                    
+                }
+
+                Transportation toRemove = tripToRemoveTransport.getTransportation();
+
+                // removing specific transportaion option from global array
+                for (int i = 0; i < transportCount; i++) {
+                if (transportations[i] == toRemove) {
+                    // shift remaining elements left
+                    for (int j = i; j < transportCount - 1; j++) {
+                        transportations[j] = transportations[j + 1];
+                    }
+                    transportations[transportCount - 1] = null;
+                    transportCount--;
+                    break;
+                    }              
+                }
+                // removing tranportation option from specified trip
+                tripToRemoveTransport.setTransportation(null);
+                System.out.println("Transportation removed from trip successfully!");
+                break;
+            case 3:
+                // Listing options
+                if (transportCount == 0) {
+                System.out.println("No transportation options available.");
+                break;
+                }
+
+                System.out.println("Select type to list:");
+                System.out.println("1. Flight");
+                System.out.println("2. Train");
+                System.out.println("3. Bus");
+
+                int typeChoice = in.nextInt();
+                in.nextLine();
+                boolean found = false;
+
+                for (int i = 0; i < transportCount; i++){
+                    Transportation temp = transportations[i];
+                    switch (typeChoice) {
+                        case 1 :
+                            // search for flight
+                            if (temp instanceof Flight){
+                                System.out.println(temp);
+                                found = true;
+                            }
+                             break;
+                        case 2:
+                            // search for Train
+                            if (temp instanceof Train){
+                                System.out.println(temp);
+                                found = true;
+                            }
+                            break;
+                        case 3:
+                            // search for bus
+                            if (temp instanceof Bus){
+                                System.out.println(temp);
+                                found = true;
+                            }
+                            break;
+                            
+                        
+                        default:
+                            System.out.println("Invalid selection.");break;
+                    }
+                }
+                if (!found){
+                    System.out.println("No transportation of selected type found.");
+                }
+                break;
+                
+                
+            default:
+                System.out.println("Invalid selection.");break;
+        }
+       
+
+    }    
+    
+    //----------------------------------
+    // ACCOMMODATION MENU
+    //----------------------------------
+    public static void accommodationMenu(Scanner in){
+    System.out.println("1. Add a acommodation option");
+    System.out.println("2. Remove a accommodation option");
+    System.out.println("3. List accommodations by type");
+    int menuChoice = in.nextInt();
+    in.nextLine();
+    switch (menuChoice) {
+        case 1:
+            // adding accommodation
+            if (tripCount == 0) {
+                 System.out.println("No trips available to add accommadation.");
+                 return;
+                }
+
+                    System.out.println("Select trip you would like to add accommadation to:");
+                    listTrips();
+                    int tripIndex = in.nextInt();
+                    in.nextLine();
+
+                    if (tripIndex < 0 || tripIndex >= tripCount) {
+                        System.out.println("Invalid trip selection!");
+                        return; 
+                    }
+
+                    Trip selectedTrip = trips[tripIndex];
+                    Accommadation acc = null;
+
+                    System.out.println("Enter company name");
+                    String name = in.nextLine();
+                    System.out.println("Enter price per night");
+                    double price = in.nextDouble();
+                    in.nextLine();
+                    System.out.println("Enter location");
+                    String location = in.nextLine();
+
+                    System.out.println("Please choose between 1. Hotel or 2. Hostel for acommodation");
+                    int accChoice = in.nextInt();
+                    in.nextLine();
+                    switch (accChoice) {
+                        case 1:
+                            // Hotel attributes
+                            System.out.println("Enter number of stars (1-5)");
+                            int stars = in.nextInt();
+                            in.nextLine();
+                            System.out.println("Enter service fees (fees will only be charged once not per night)");
+                            double fees = in.nextDouble();
+                            in.nextLine();
+                            acc = new Hotel(name, location, price, stars, fees);                         
+                            break;
+                        case 2:
+                            // Hostel attributes
+                            System.out.println("Enter number of beds");
+                            int beds = in.nextInt();
+                            in.nextLine();
+                            System.out.println("Enter additional fees");
+                            double fee = in.nextDouble();
+                            in.nextLine();
+                            acc = new Hostel(name, location, price, beds, fee);
+                            break;                            
+                        default:
+                            System.out.println("Invalid option!");return;
+                    }
+                    if (accommadationCount < accommadations.length){
+                        accommadations[accommadationCount] = acc;
+                        accommadationCount++;
+                        selectedTrip.setAccommadation(acc);
+                        System.out.println("Acommodation added to trip!");
+                    } else {
+                        System.out.println("Accommodation list full cannot add more");
+                    }
+                break;
+        case 2:
+            // remove accommadation
+            if (accommadationCount ==0){
+                System.out.println("There are no accommadation available to remove");break;
+            }
+            System.out.println("Enter index of trip you would like the accommdation to be removed from");
+            listTrips();
+            int accRemoveIndex = in.nextInt();
+            in.nextLine();
+            if (accRemoveIndex < 0 || accRemoveIndex >= tripCount){
+                System.out.println("Invalid entry!");return;
+            }
+
+            Trip tripRemoveAcc = trips[accRemoveIndex];
+            if (tripRemoveAcc.getAccommadation() == null){
+                System.out.println("There is no accommadation assigned to this trip");break;
+            }
+            Accommadation accTemp = tripRemoveAcc.getAccommadation();
+            // removing specific accommadation option from global array
+                for (int i = 0; i < accommadationCount; i++) {
+                if (accommadations[i] == accTemp) {
+                    // shift remaining elements left
+                    for (int j = i; j < accommadationCount - 1; j++) {
+                        accommadations[j] = accommadations[j + 1];
+                    }
+                    accommadations[accommadationCount - 1] = null;
+                    accommadationCount--;
+                    break;
+                    }              
+                }
+                // removing tranportation option from specified trip
+                tripRemoveAcc.setAccommadation(null);
+                System.out.println("Accommadation removed from trip successfully!");
+                break;
+        case 3:
+             // Listing options
+             if (accommadationCount == 0) {
+                System.out.println("No accommadation options available.");
+                break;
+                }
+
+                System.out.println("Select type to list:");
+                System.out.println("1. Hotel");
+                System.out.println("2. Hostel");
+               
+
+                int typeChoice = in.nextInt();
+                in.nextLine();
+                boolean found = false;
+                if (typeChoice != 1 && typeChoice != 2) {
+                System.out.println("Invalid selection.");
+                break;
+                }
+
+
+                for (int i =0; i < accommadationCount ;i++){
+                    Accommadation temp = accommadations[i];
+                    switch (typeChoice) {
+                        case 1:
+                            // searching for hotels
+                            if (temp instanceof Hotel){
+                                System.out.println(temp);
+                                found = true;
+                            }                            
+                            break;
+                        case 2: 
+                            // searching for Hostels
+                            if (temp instanceof Hostel){
+                                System.out.println(temp);
+                                found = true;
+                            }
+                            break;
+                        default:
+                            System.out.println("Invalid selection.");break;
+                    }
+                }
+                if (!found){
+                    System.out.println("No accommadation of selected type found.");
+                }
+                break;
+        default:
+           System.out.println("Invalid selection.");break;
+    }
+
+    }   
+    //----------------------------------
+    // ADDITIONAL MENU
+    //----------------------------------
+    public static void additionalMenu(Scanner in){
+    int choice = 0;
+    do {
+        System.out.println("===== ADDITIONAL OPERATIONS =====");
+        System.out.println("1. Display the most expensive trip");
+        System.out.println("2. Calculate and display total cost of a trip");
+        System.out.println("3. Create a deep copy of the transportation array");
+        System.out.println("4. Create a deep copy of the accommodation array");
+        System.out.println("5. Return to main menu");
+        System.out.print("Choice: ");
+        choice = in.nextInt();
+        in.nextLine();
+
+        switch (choice) {
+            case 1:
+                // show most expensive trip
+                if(tripCount == 0){
+                    System.out.println("No trips available.");
+                    break;
+                }
+                Trip expensiveTrip = trips[0];
+                double highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                for (int i =0; i < tripCount;i++){
+                    double tempCost = trips[i].calculateTotalCost(trips[i].getDuration());
+                    if (tempCost > highestCost){
+                        highestCost =tempCost;
+                        expensiveTrip = trips[i];
+                    }
+                }
+                System.out.println("Most expensive trip: \n" + expensiveTrip.toString());
+                System.out.println("With a cost of: " + highestCost);                
+                break;
+            case 2:
+                // calculate cost of selected trip
+                if(tripCount == 0){
+                    System.out.println("No trips available.");
+                    break;
+                }
+                System.out.println("Enter index of trip you would like to calculate cost for");
+                listTrips();
+                int indexChoice = in.nextInt();
+                in.nextLine();
+                if (indexChoice < 0 || indexChoice >= tripCount){
+                    System.out.println("Invalid choice");break;
+                }
+                Trip temp = trips[indexChoice];
+                System.out.println(temp.calculateTotalCost(temp.getDuration()));
+                break;
+            case 3:
+                // copy transportation array
+                Transportation[] copyTransportations = new Transportation[transportCount];
+                for (int i =0;i<transportCount;i++){
+                    if (transportations[i] instanceof Flight){
+                        Flight flightTemp = (Flight) transportations[i];
+                        copyTransportations[i] = new Flight(flightTemp);
+                    } else if (transportations[i] instanceof Train){
+                        Train trainTemp = (Train) transportations[i];
+                        copyTransportations[i] = new Train(trainTemp);
+                    }else if (transportations[i] instanceof Bus){
+                        Bus busTemp = (Bus) transportations[i];
+                        copyTransportations[i] = new Bus(busTemp);
+                    }
+
+                }
+                System.out.println("Transportation array deep-copied.");
+                break;
+            case 4:
+                // deep copy accommadations array
+                Accommadation[] copyAccommadations = new Accommadation[accommadationCount];
+                for (int i=0;i<accommadationCount;i++){
+                    if (accommadations[i] instanceof Hotel){
+                        Hotel hotelTemp = (Hotel) accommadations[i];
+                        copyAccommadations[i] = new Hotel(hotelTemp);
+                    } else if (accommadations[i] instanceof Hostel){
+                        Hostel hostelTemp = (Hostel) accommadations[i];
+                        copyAccommadations[i] = new Hostel(hostelTemp);
+                    }
+                }
+                System.out.println("Accommadations array deep-copied.");
+                break;
+            case 5:
+                //exit 
+                System.out.println("Returning to main menu...");
+                break;
+
+
+            default:
+                System.out.println("Invalid selection.");break;
+        }
+
+    } while (choice != 5);
+    }
+
+    // method for cleint menu to list clients
+    public static void listClients(){
+        System.out.println("Clients list:");
+        for (int i = 0; i < clientCount; i++) {
+        System.out.println(i + ". " + clients[i].getFirstName() + " " + clients[i].getLastName() + " " + clients[i].getEmailAddress());
+        }
+    } 
+
+    // mehtod for trip menu to list all trips
     public static void listTrips() {
     if (tripCount == 0) {
         System.out.println("No trips available.");
         return;
     }
 
-        System.out.println("Trips list:");
-        for (int i = 0; i < tripCount; i++) {
-        System.out.println(i + ". " + trips[i].getDestination() +
-                " | Duration: " + trips[i].getDuration() +
-                " | Client: " + trips[i].getClient());
+    System.out.println("Trips list:");
+    for (int i = 0; i < tripCount; i++) {
+        Trip t = trips[i];
+        System.out.println(i + ". Destination: " + t.getDestination() +
+                " | Duration: " + t.getDuration() +
+                " | Client: " + t.getClient().getFirstName() + " " + t.getClient().getLastName());
+
+        // show full transportation details
+        if (t.getTransportation() != null) {
+            System.out.println("    Transportation Details:\n" + t.getTransportation());
+        } else {
+            System.out.println("    Transportation: None");
+        }
+
+        // show full accommodation details
+        if (t.getAccommadation() != null) {
+            System.out.println("    Accommodation Details:\n" + t.getAccommadation());
+        } else {
+            System.out.println("    Accommodation: None");
         }
     }
+}
 
 
-    public static void transportationMenu(Scanner in){
-    System.out.println("Transportation menu not implemented yet.");
-    }
 
-    public static void accommodationMenu(Scanner in){
-    System.out.println("Accommodation menu not implemented yet.");
-    }   
-
-    public static void additionalMenu(Scanner in){
-    System.out.println("Additional operations not implemented yet.");
-    }
 
 
 }
