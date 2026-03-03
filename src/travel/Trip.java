@@ -48,7 +48,7 @@ public class Trip {
 
   public double calculateTotalCost(int numberOfDays) {
     double total = 0;
-    total = basePrice*duration;
+    total = basePrice*numberOfDays;
     if (transportation != null) {
         total += transportation.calculateTotalCost(numberOfDays);
     }

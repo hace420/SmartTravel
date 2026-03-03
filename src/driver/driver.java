@@ -1,3 +1,10 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
+// Driver forSmart Travel program includs menu drien interface and testing scenario with hard coded values
+// Currently max size for any array in program in 50 
 package driver;
 import client.*;
 import java.util.Scanner;
@@ -18,7 +25,7 @@ public class driver {
         int menuChoice = 0;
         Scanner in = new Scanner(System.in);
 
-        System.out.println("Select between 1. Menu driven interface 2. Predefined (hard-coded) testing scenario");
+        System.out.println("Select between \n1. Menu driven interface \n2. Predefined (hard-coded) testing scenario");
         menuChoice = in.nextInt();
         in.nextLine();
 
@@ -1001,7 +1008,35 @@ public class driver {
             System.out.println("    Accommodation: None");
         }
     }
+    
 }
+// --- deep copy transportation array ---
+    public static Transportation[] copyTransportationArray(Transportation[] original) {
+
+    if (original == null) {
+        return null;
+    }
+
+    Transportation[] copy = new Transportation[original.length];
+
+    for (int i = 0; i < original.length; i++) {
+
+        if (original[i] != null) {
+
+            if (original[i] instanceof Flight) {
+                copy[i] = new Flight((Flight) original[i]);
+
+            } else if (original[i] instanceof Train) {
+                copy[i] = new Train((Train) original[i]);
+
+            } else if (original[i] instanceof Bus) {
+                copy[i] = new Bus((Bus) original[i]);
+            }
+        }
+    }
+
+    return copy;
+  }
 
     //----------------------------------
     // Hard Coded testing scenerio 
@@ -1068,7 +1103,7 @@ public class driver {
         // --- Display all created objects --- 
         System.out.println("\n--- Clients ---");
         for (int i = 0; i < testClientCount; i++) {
-            System.out.println(testClientArray[i]);
+            System.out.println("\n"+testClientArray[i]);
         }
         System.out.println("\n--- Trips ---");
         for (int i = 0; i < testTripCount; i++) {
@@ -1104,22 +1139,25 @@ public class driver {
         
         System.out.println("\n--- Polymorphic Total Cost Calculations ---");
 
-        for (int i = 0; i < testTripArray.length; i++) {
-            Trip trip = testTripArray[i];
+            for (int i = 0; i < testTripArray.length; i++) {
+                Trip trip = testTripArray[i];
 
-            // Using base-class references
-            Transportation transport = trip.getTransportation(); // Flight, Train, or Bus
-            Accommadation accommodation = trip.getAccommadation(); // Hotel or Hostel
+                Transportation transport = trip.getTransportation();
+                Accommadation accommodation = trip.getAccommadation();
 
-            double transportCost = transport.calculateTotalCost(trip.getDuration());
-            double accommodationCost = accommodation.calculateTotalCost(trip.getDuration());
-            double totalCost = transportCost + accommodationCost;
+                double transportCost = transport.calculateTotalCost(trip.getDuration());
+                double accommodationCost = accommodation.calculateTotalCost(trip.getDuration());
 
-            System.out.println("Trip to " + trip.getDestination() + " for client " + trip.getClient().getFirstName());
-            System.out.println( transport + " -> Cost: " + transportCost);
-            System.out.println( accommodation + " -> Cost: " + accommodationCost);
-            System.out.println("Total Trip Cost: " + totalCost + "\n");
-        }
+                double totalCost = trip.calculateTotalCost(trip.getDuration()); 
+
+                System.out.println("\nTrip to " + trip.getDestination() +
+                                " for client " + trip.getClient().getFirstName());
+
+                System.out.println("transport" + " -> Cost: " + transportCost);
+                System.out.println("accommodation" + " -> Cost: " + accommodationCost);
+                System.out.println(trip.toString());
+                
+            }
 
         // --- Displaying most Expensive "test" trip ---
         System.out.println("\n------ Displaying most Expensive test trip ------");
@@ -1176,15 +1214,3 @@ public class driver {
 
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
