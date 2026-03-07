@@ -1,5 +1,7 @@
 package travel;
 
+import exceptions.InvalidAccommodationDataException;
+
 public class Hotel extends Accommadation{
     private int numberOfStars; // rating goes from 1 to 5 (5 being the best)
     private double serviceFees; // cost that will be added to pricePerNight (fee will only be charged once not per night)
@@ -9,7 +11,8 @@ public class Hotel extends Accommadation{
         super();
         numberOfStars = 0;
     }
-    public Hotel(String name,String location,double pricePerNight,int numberOfStars,double serviceFees){
+    public Hotel(String name,String location,double pricePerNight,int numberOfStars,double serviceFees)throws InvalidAccommodationDataException{
+        if (numberOfStars < 1 || numberOfStars >5) throw new InvalidAccommodationDataException("Stars must be between 1-5");
         super(name, location, pricePerNight);
         this.numberOfStars = numberOfStars;
         this.serviceFees = serviceFees;
@@ -29,7 +32,8 @@ public class Hotel extends Accommadation{
     }
 
     // getters
-    public int getNumberOfStars(){
+    public int getNumberOfStars()throws InvalidAccommodationDataException{
+        if (numberOfStars < 1 || numberOfStars >5) throw new InvalidAccommodationDataException("Stars must be between 1-5");
         return numberOfStars;
     }
     public double getServiceFees(){
@@ -38,7 +42,8 @@ public class Hotel extends Accommadation{
 
     // calculates total cost service fees are only added at the end not charged daily
     @Override
-    public double calculateTotalCost(int numberOfDays){
+    public double calculateTotalCost(int numberOfDays)throws InvalidAccommodationDataException{
+        if (numberOfDays <= 0 ) throw new InvalidAccommodationDataException("NUmber of days needs to be greater to or equal to 1");
         return (this.getPricePerNight() * numberOfDays) + serviceFees;
     }
 

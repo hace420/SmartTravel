@@ -1,4 +1,5 @@
 package travel;
+import exceptions.*;
 
 public class Hostel extends Accommadation {
     private int numberOfBeds;
@@ -10,7 +11,8 @@ public class Hostel extends Accommadation {
         numberOfBeds =0;
         fees=0;
     }
-    public Hostel(String name,String location,double pricePerNight,int numberOfBeds,double fees){
+    public Hostel(String name,String location,double pricePerNight,int numberOfBeds,double fees)throws InvalidAccommodationDataException{
+        if (pricePerNight > 150) throw new InvalidAccommodationDataException("Price per night for Hostel is at the most 150$");
         super(name, location, pricePerNight);
         this.numberOfBeds = numberOfBeds;
         this.fees =fees;
@@ -27,6 +29,7 @@ public class Hostel extends Accommadation {
     public void setNumberOfBeds(int numberOfBeds){
         this.numberOfBeds = numberOfBeds;
     }
+    
     public void setFees(double fees){
         this.fees = fees;
     }
@@ -41,7 +44,8 @@ public class Hostel extends Accommadation {
 
     // calculates total cost for hostel 
     @Override
-    public double calculateTotalCost(int numberOfDays){
+    public double calculateTotalCost(int numberOfDays)throws InvalidAccommodationDataException{
+        if (numberOfDays <= 0 ) throw new InvalidAccommodationDataException("NUmber of days needs to be greater to or equal to 1");
         return (this.getPricePerNight() * numberOfDays) + fees;
     }
 

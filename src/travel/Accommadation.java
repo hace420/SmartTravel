@@ -1,5 +1,7 @@
 package travel;
 
+import exceptions.InvalidAccommodationDataException;
+
 public abstract  class Accommadation {
     private static int nextId = 4001;
     final private String AccommId;
@@ -16,7 +18,8 @@ public abstract  class Accommadation {
         nextId++;
         pricePerNight =0;
     }
-    public Accommadation(String name,String location,double pricePerNight){    
+    public Accommadation(String name,String location,double pricePerNight)throws InvalidAccommodationDataException{    
+        if (pricePerNight < 0) throw new InvalidAccommodationDataException("Price must be at a minimum of 0$");
         this.name = name;
         this.location = location;
         this.pricePerNight = pricePerNight;
@@ -38,7 +41,8 @@ public abstract  class Accommadation {
     public void setLocation(String location){
         this.location = location;
     }
-    public void setPricePerNight(double pricePerNight){
+    public void setPricePerNight(double pricePerNight)throws InvalidAccommodationDataException{
+        if (pricePerNight < 0) throw new InvalidAccommodationDataException("Price must be at a minimum of 0$");
         this.pricePerNight = pricePerNight;
     }
 
@@ -54,7 +58,8 @@ public abstract  class Accommadation {
     }
 
     // method to calculate total cost of add-on transport fees
-    public abstract double calculateTotalCost(int numberOfDays);
+    public abstract double calculateTotalCost(int numberOfDays)throws InvalidAccommodationDataException;
+    
 
     @Override
     public String toString(){

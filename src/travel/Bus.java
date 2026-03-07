@@ -1,5 +1,7 @@
 package travel;
 
+import exceptions.InvalidTransportDataException;
+
 public class Bus extends Transportation{
     private String busCompany;
     private int numberOfStops;
@@ -11,7 +13,8 @@ public class Bus extends Transportation{
         numberOfStops  = 0;
         busCost = 0;
     }
-    public Bus(String companyName, String departureCity, String arrivalCity,String busCompany,int numberOfStops, double busCost) {
+    public Bus(String companyName, String departureCity, String arrivalCity,String busCompany,int numberOfStops, double busCost) throws InvalidTransportDataException{
+        if (numberOfStops < 0) throw new InvalidTransportDataException("NUmber of stops must be equal to or greater than 1");
         super(companyName, departureCity, arrivalCity);
         this.numberOfStops = numberOfStops;
         this.busCompany = busCompany;
@@ -30,7 +33,8 @@ public class Bus extends Transportation{
     public void setBusCompany(String busCompany){
         this.busCompany = busCompany;
     }
-    public void setNumberOfStops(int numberOfStops){
+    public void setNumberOfStops(int numberOfStops)throws InvalidTransportDataException{
+        if (numberOfStops < 0) throw new InvalidTransportDataException("NUmber of stops must be equal to or greater than 1");
         this.numberOfStops = numberOfStops;
     }
     public void setBusCost(double busCost){

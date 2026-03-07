@@ -7,6 +7,7 @@
 // Currently max size for any array in program in 50 
 package driver;
 import client.*;
+import exceptions.*;
 import java.util.Scanner;
 import travel.*;
 
@@ -94,7 +95,11 @@ public class driver {
                 System.out.print("Enter email: ");
                 String email = in.nextLine();
 
-                Client newClient = new Client(first, last, email);
+                try {
+                    if (emailDuplicateCheck(email, null)) {
+                        throw new DuplicateEmailException("Email "+email+" is already registered to a client");
+                    }
+                    Client newClient = new Client(first, last, email);
                 if (clientCount < clients.length) {
                     clients[clientCount] = newClient;
                     clientCount++;
@@ -102,6 +107,12 @@ public class driver {
                 } else {
                     System.out.println("Client list is full!");
                 }
+                } catch (InvalidClientDataException ex) {
+                    System.out.println("Error: "+ex.getMessage());
+                } catch (DuplicateEmailException ex){
+                    System.out.println("Error: "+ex.getMessage());
+                }
+                
                 break;
 
             case 2:
@@ -110,12 +121,16 @@ public class driver {
                 int choice = 0;
                 choice = in.nextInt();
                 in.nextLine();
-                
                 // checking if choice is valid
-                if (choice < 0 || choice >= clientCount) {
-                System.out.println("Invalid client selection!");
-                break;
-    }
+                try {
+                    findClientByIndex(choice);
+                } catch (EntityNotFoundException ex) {
+                    System.out.println("Error: Client not found");
+                    break;
+                }
+                
+               
+    
 
                 System.out.println("Would you like to edit 1. First name 2. Last name 3. Email address");
                 int choice2 = 0;
@@ -127,20 +142,38 @@ public class driver {
                         String f;
                         System.out.println("Enter first name: ");
                         f = in.nextLine();
-                        clients[choice].setFirstName(f);
-
+                        try {
+                            clients[choice].setFirstName(f);
+                        } catch (InvalidClientDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        }                      
                         break;
+
                     case 2:
                          String l;
                         System.out.println("Enter last name: ");
                         l = in.nextLine();
-                        clients[choice].setLastName(l);
+                        try {
+                            clients[choice].setLastName(l);
+                        } catch (InvalidClientDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        }
                         break;
+
                     case 3:
                          String e;
                         System.out.println("Enter email address: ");
                         e = in.nextLine();
-                        clients[choice].setEmailAddress(e);;
+                        try {
+                            if (emailDuplicateCheck(e, null)) {
+                            throw new DuplicateEmailException("Email "+e+" is already registered to a client");}
+                            clients[choice].setEmailAddress(e);
+                        } catch (InvalidClientDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        } catch (DuplicateEmailException ex){
+                        System.out.println("Error: "+ex.getMessage());
+                        }
+                       
                         break;
                     default:
                         System.out.println("Invalid option!");;
@@ -154,9 +187,11 @@ public class driver {
                 choice3 = in.nextInt();
                 in.nextLine();
 
-                if (choice3 < 0 || choice3 >= clientCount) {
-                System.out.println("Invalid client selection!");
-                break;
+                 try {
+                    findClientByIndex(choice3);
+                } catch (EntityNotFoundException ex) {
+                    System.out.println("Error: Client not found");
+                    break;
                 }
                 //moving all elemeents in array one position to the left starting at index of client that needs to be removed
                 // this "deletes" the cleint at that index but will cause last 2 elements to be duplicates
@@ -223,9 +258,11 @@ public class driver {
                     int clientIndex = in.nextInt();
                     in.nextLine();
                     // chekcing for valid client index
-                    if (clientIndex < 0 || clientIndex >= clientCount) {
-                    System.out.println("Invalid client selection!");
-                    break;
+                        try {
+                        findClientByIndex(clientIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Client not found");
+                        break;
                     }
 
                     Client selectedClient = clients[clientIndex];
@@ -259,7 +296,12 @@ public class driver {
                                 System.out.print("Enter luggage cost: ");
                                 double luggageCost = in.nextDouble();
                                 in.nextLine();
-                                transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                                try {
+                                    transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                                } catch (InvalidTransportDataException ex) {
+                                    System.out.println("Error: "+ ex.getMessage());
+                                }
+                                
                                     break;
                             case 2:
                                 // Train-specific attributes
@@ -299,7 +341,12 @@ public class driver {
                                 System.out.println("Enter bus cost (base 20$ with surcharge of 1$ extra for every stop)");
                                 double c = in.nextDouble();
                                 in.nextLine();
-                                transport = new Bus(company, depart, arrive, n, stops, c);
+                                try {
+                                    transport = new Bus(company, depart, arrive, n, stops, c);
+                                } catch (InvalidTransportDataException ex) {
+                                    System.out.println("Error: "+ex.getMessage());
+                                }
+                                
                                 break;
                                 }
                             if (transportCount < transportations.length){
@@ -337,7 +384,13 @@ public class driver {
                             System.out.println("Enter service fees (fees will only be charged once not per night)");
                             double fees = in.nextDouble();
                             in.nextLine();
-                            acc = new Hotel(name, location, price, stars, fees);                         
+
+                            try {
+                            acc = new Hotel(name, location, price, stars, fees); 
+                            } catch (InvalidAccommodationDataException ex) {
+                                 System.out.println("Error: "+ex.getMessage());
+                            }
+                                                    
                             break;
                         case 2:
                             // Hostel attributes
@@ -347,7 +400,12 @@ public class driver {
                             System.out.println("Enter additional fees");
                             double fee = in.nextDouble();
                             in.nextLine();
-                            acc = new Hostel(name, location, price, beds, fee);
+                            try {
+                                acc = new Hostel(name, location, price, beds, fee);
+                            } catch (InvalidAccommodationDataException ex) {
+                                System.out.println("Error: "+ex.getMessage());
+                            }
+                            
                             break;                            
                         default:
                             System.out.println("Invalid option!");break;
@@ -361,8 +419,14 @@ public class driver {
 
                 }
                 if (tripCount < trips.length) {
-                trips[tripCount++] = new Trip(destination, duration, basePrice, selectedClient, transport, acc);
-                System.out.println("Trip successfully created!");
+                    try {
+                        trips[tripCount++] = new Trip(destination, duration, basePrice, selectedClient, transport, acc);
+                        System.out.println("Trip successfully created!");
+                    } catch (InvalidTripDataException ex) {
+                         System.out.println("Error: "+ex.getMessage());
+                    }
+                
+                
                 } else {
                 System.out.println("Trip list is full!");
                 }
@@ -381,8 +445,10 @@ public class driver {
                     int editIndex = in.nextInt();
                     in.nextLine();
 
-                    if (editIndex < 0 || editIndex >= tripCount) {
-                        System.out.println("Invalid trip selection!");
+                    try {
+                        findTripByIndex(editIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
                         break;
                     }
 
@@ -410,14 +476,24 @@ public class driver {
                             System.out.print("Enter new duration: ");
                             int newDuration = in.nextInt();
                             in.nextLine();
-                            tripToEdit.setDuration(newDuration);
+                            try {
+                                tripToEdit.setDuration(newDuration);
+                            } catch (InvalidTripDataException ex) {
+                                System.out.println("Error: "+ex.getMessage());
+                            }
+                            
                             break;
 
                         case 3:
                             System.out.print("Enter new base price: ");
                             double newPrice = in.nextDouble();
                             in.nextLine();
-                            tripToEdit.setBasePrice(newPrice);
+                            try {
+                                tripToEdit.setBasePrice(newPrice);
+                            } catch (InvalidTripDataException ex) {
+                                System.out.println("Error: "+ex.getMessage());
+                            }
+                            
                             break;
 
                         case 4:
@@ -426,12 +502,19 @@ public class driver {
                             int newClientIndex = in.nextInt();
                             in.nextLine();
 
-                            if (newClientIndex < 0 || newClientIndex >= clientCount) {
-                                System.out.println("Invalid client selection!");
+                            try {
+                                Client newClient = findClientByIndex(newClientIndex);
+                                tripToEdit.setClient(newClient);
+                                System.out.println("Client updated successfully!");
+                            } catch (InvalidTripDataException ex) {
+                                System.out.println("Error: " + ex.getMessage());
+                                break;
+                            } catch (EntityNotFoundException ex) {
+                                System.out.println("Error: Client not found");
                                 break;
                             }
 
-                            tripToEdit.setClient(clients[newClientIndex]);
+                           
                             break;
 
                         case 5: // exit sub menu
@@ -448,9 +531,12 @@ public class driver {
                 System.out.println("Select trip you would like to delete by entering the trips index number");
                 int index = in.nextInt();
                 in.nextLine();
-                if (index < 0 || index >= tripCount) {
-                    System.out.println("Invalid entry!"); break;
-                }
+                try {
+                    findTripByIndex(index);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
+                        break;
+                    }
                 //moving all elemeents in array one position to the left starting at index of trip that needs to be removed
                 // this "deletes" the cleint at that index but will cause last 2 elements to be duplicates
                 // avoid null in the middle of array
@@ -471,28 +557,29 @@ public class driver {
             System.out.println("Enter index of client to search for");
             int searchIndex = in.nextInt();
             in.nextLine();
-            if (searchIndex < 0 || searchIndex >= clientCount){
-                System.out.println("Invalid entry!");
-                break;
-            }
-            if (tripCount == 0 ) {
-                System.out.println("No trips found");
-                break;
-            } 
-            if (clientCount == 0 ) {
-                System.out.println("No clients found");
-                break;
-            }  
+            try {
+                findClientByIndex(searchIndex);
+                } catch (EntityNotFoundException ex) {
+                    System.out.println("Error: Client not found");
+                    break;
+                }
+            
+              
             
             boolean found = false;
             Client selectedClient1 = clients[searchIndex];
             System.out.println("Trips found for client "+ clients[searchIndex].toString());
             for (int i = 0; i < tripCount;i++ ){
                 if (trips[i].getClient() == selectedClient1) {
-                    System.out.println("Destonation: " + trips[i].getDestination()+
+                    try {
+                        System.out.println("Destonation: " + trips[i].getDestination()+
                                         "\nDuration: " + trips[i].getDuration()+
                                         "\nPrice: "+ trips[i].calculateTotalCost(trips[i].getDuration()));
                                         found = true;
+                    } catch (InvalidAccommodationDataException ex) {
+                        System.out.println("Error: "+ex.getMessage());
+                    }
+                    
                 }
             }
             if (!found){
@@ -533,9 +620,11 @@ public class driver {
                     int tripIndex = in.nextInt();
                     in.nextLine();
 
-                    if (tripIndex < 0 || tripIndex >= tripCount) {
-                        System.out.println("Invalid trip selection!");
-                        return;
+                    try {
+                    findTripByIndex(tripIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
+                        break;
                     }
 
                     Trip selectedTrip = trips[tripIndex];
@@ -565,7 +654,12 @@ public class driver {
                         System.out.print("Enter luggage cost: ");
                         double luggageCost = in.nextDouble();
                         in.nextLine();
-                        transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                        try {
+                            transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                        } catch (InvalidTransportDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        }
+                        
                         break;
 
                     case 2:
@@ -601,7 +695,13 @@ public class driver {
                         System.out.print("Enter bus cost (base 20$ + 1$ per stop): ");
                         double busCost = in.nextDouble();
                         in.nextLine();
-                        transport = new Bus(company, depart, arrive, busName, stops, busCost);
+                        
+                        try {
+                            transport = new Bus(company, depart, arrive, busName, stops, busCost);
+                        } catch (InvalidTransportDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        }
+                        
                         break;
 
                         default:
@@ -631,9 +731,12 @@ public class driver {
                 listTrips();
                 int tripRemoveIndex = in.nextInt();
                 in.nextLine();
-                if (tripRemoveIndex <  0 || tripRemoveIndex >= tripCount){
-                    System.out.println("Invalid index entered!");return;
-                }
+                try {
+                    findTripByIndex(tripRemoveIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
+                        break;
+                    }
                 Trip tripToRemoveTransport = trips[tripRemoveIndex];
 
                 if (tripToRemoveTransport.getTransportation() == null) {
@@ -739,9 +842,11 @@ public class driver {
                     int tripIndex = in.nextInt();
                     in.nextLine();
 
-                    if (tripIndex < 0 || tripIndex >= tripCount) {
-                        System.out.println("Invalid trip selection!");
-                        return; 
+                    try {
+                    findTripByIndex(tripIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
+                        break;
                     }
 
                     Trip selectedTrip = trips[tripIndex];
@@ -767,7 +872,12 @@ public class driver {
                             System.out.println("Enter service fees (fees will only be charged once not per night)");
                             double fees = in.nextDouble();
                             in.nextLine();
-                            acc = new Hotel(name, location, price, stars, fees);                         
+                            try {
+                                acc = new Hotel(name, location, price, stars, fees);  
+                            } catch (InvalidAccommodationDataException ex) {
+                                System.out.println("Error: "+ex.getMessage());
+                            }
+                                                   
                             break;
                         case 2:
                             // Hostel attributes
@@ -777,7 +887,12 @@ public class driver {
                             System.out.println("Enter additional fees");
                             double fee = in.nextDouble();
                             in.nextLine();
-                            acc = new Hostel(name, location, price, beds, fee);
+                            try {
+                                acc = new Hostel(name, location, price, beds, fee);
+                            } catch (InvalidAccommodationDataException ex) {
+                                System.out.println("Error: "+ex.getMessage());
+                            }
+                            
                             break;                            
                         default:
                             System.out.println("Invalid option!");return;
@@ -800,9 +915,12 @@ public class driver {
             listTrips();
             int accRemoveIndex = in.nextInt();
             in.nextLine();
-            if (accRemoveIndex < 0 || accRemoveIndex >= tripCount){
-                System.out.println("Invalid entry!");return;
-            }
+            try {
+                    findTripByIndex(accRemoveIndex);
+                    } catch (EntityNotFoundException ex) {
+                        System.out.println("Error: Trip not found");
+                        break;
+                    }
 
             Trip tripRemoveAcc = trips[accRemoveIndex];
             if (tripRemoveAcc.getAccommadation() == null){
@@ -900,13 +1018,26 @@ public class driver {
                     break;
                 }
                 Trip expensiveTrip = trips[0];
-                double highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                double highestCost =0;
+                try {
+                    highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                } catch (InvalidAccommodationDataException ex) {
+                    System.out.println("Error: "+ex.getMessage());
+                }
+                
+
                 for (int i =0; i < tripCount;i++){
-                    double tempCost = trips[i].calculateTotalCost(trips[i].getDuration());
-                    if (tempCost > highestCost){
-                        highestCost =tempCost;
-                        expensiveTrip = trips[i];
+                    try {
+                        double tempCost = trips[i].calculateTotalCost(trips[i].getDuration());
+                        if (tempCost > highestCost){
+                            highestCost =tempCost;
+                            expensiveTrip = trips[i];
                     }
+                    } catch (InvalidAccommodationDataException ex) {
+                        System.out.println("Error: "+ex.getMessage());
+
+                    }
+                    
                 }
                 System.out.println("Most expensive trip: \n" + expensiveTrip.toString());
                 System.out.println("With a cost of: " + highestCost);                
@@ -925,7 +1056,12 @@ public class driver {
                     System.out.println("Invalid choice");break;
                 }
                 Trip temp = trips[indexChoice];
-                System.out.println(temp.calculateTotalCost(temp.getDuration()));
+                try {
+                    System.out.println(temp.calculateTotalCost(temp.getDuration()));
+                } catch (InvalidAccommodationDataException ex) {
+                    System.out.println("Error: "+ex.getMessage());
+                }
+                
                 break;
             case 3:
                 // copy transportation array
@@ -971,7 +1107,7 @@ public class driver {
 
     } while (choice != 5);
     }
-
+// --- HELPER METHODS ---
     // method for cleint menu to list clients
     public static void listClients(){
         System.out.println("Clients list:");
@@ -1037,7 +1173,57 @@ public class driver {
 
     return copy;
   }
+// --- Find Client by email (EntityNotFoundException handled) ---
+    private static Client findClientByEmail(String email) throws EntityNotFoundException {
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i].getEmailAddress().equalsIgnoreCase(email)) {
+            return clients[i];
+        }
+    }
+    throw new EntityNotFoundException("Error: Client not found");
+    }
 
+// --- Find Client by index (EntityNotFoundException handled) ---
+    private static Client findClientByIndex(int index) throws EntityNotFoundException {
+    if (index < 0 || index >= clientCount) {
+        throw new EntityNotFoundException("Error: Client not found");
+    }
+    return clients[index];
+    }
+
+// --- Find Trip by index (EntityNotFoundException handled) ---
+    private static Trip findTripByIndex(int index) throws EntityNotFoundException {
+    if (index < 0 || index >= tripCount) {
+        throw new EntityNotFoundException("Error: Trip not found");
+    }
+    return trips[index];
+    } 
+// --- Find Transportation by index (EntityNotFoundException handled) ---
+    private static Transportation findTransportationByIndex(int index) throws EntityNotFoundException {
+    if (index < 0 || index >= transportCount) {
+        throw new EntityNotFoundException("Error: Transportation not found");
+    }
+    return transportations[index];
+    }
+// --- Find Accommodation by index (EntityNotFoundException handled) ---
+    private static Accommadation findAccommodationByIndex(int index) throws EntityNotFoundException {
+    if (index < 0 || index >= accommadationCount) {
+        throw new EntityNotFoundException("Error: Accommodation not found");
+    }
+    return accommadations[index];
+    }
+// --- Checking for duyplicate emails (DuplicateEmailException handled ) ---
+    private static boolean emailDuplicateCheck(String email, Client currentClient) {
+    for (int i = 0; i < clientCount; i++) {
+        if (clients[i] != currentClient && 
+            clients[i].getEmailAddress().equalsIgnoreCase(email)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+  
     //----------------------------------
     // Hard Coded testing scenerio 
     //----------------------------------
@@ -1046,9 +1232,26 @@ public class driver {
         System.out.println("=== Predefined Testing Scenario ===");
 
         // --- Step 1: Create clients ---
-        Client c1 = new Client("Alice", "Smith", "alice@gmail.com");
-        Client c2 = new Client("Bob", "Bobertson", "bob@outlook.com");
-        Client c3 = new Client("Chris", "Williams", "chris@live.com");
+        Client c1 = null;
+        try {
+           c1 = new Client("Alice", "Smith", "alice@gmail.com");
+        } catch (InvalidClientDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        Client c2 =null;
+        try {
+            c2 = new Client("Bob", "Bobertson", "bob@outlook.com");
+        } catch (InvalidClientDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        Client c3 = null;
+        try {
+            c3  = new Client("Chris", "Williams", "chris@live.com");
+        } catch (InvalidClientDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        
+       
 
         Client[] testClientArray = new Client[3];  // --- step 4 creating arrays ----
         testClientArray[0] = c1;
@@ -1057,14 +1260,37 @@ public class driver {
         int testClientCount = 3;
 
         // --- Step 1: Create transportation ---
-        Flight f1 = new Flight("airCanada", "Montreal", "Paris", "airCanada", 20, 150, 30);
-        Flight f2 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);
+        Flight f1 = null;
+        try {
+            f1 = new Flight("airCanada", "Montreal", "Paris", "airCanada", 20, 150, 30);
+        } catch (InvalidTransportDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        Flight f2 =null;
+        try {
+            f2 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);
+        } catch (InvalidTransportDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        
 
         Train t1 = new Train("Exo", "laval", "Toronto", TrainType.HIGH_SPEED, SeatClass.FIRST_CLASS, 120);
         Train t2 = new Train("ViaRail", "Moncton", "Detroit", TrainType.LONG_DISTANCE, SeatClass.ECONOMY, 80);
 
-        Bus b1 = new Bus("Exo", "Terrebbonne", "Montreal", "Exo", 3, 23);
-        Bus b2 = new Bus("BusCO", "montreal", "laval", "BusCO", 5, 25);
+        Bus b1 = null;
+        try {
+            b1 = new Bus("Exo", "Terrebbonne", "Montreal", "Exo", 3, 23);
+        } catch (InvalidTransportDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        Bus b2 = null;
+        try {
+           b2 = new Bus("BusCO", "montreal", "laval", "BusCO", 5, 25);
+        } catch (InvalidTransportDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
 
         Transportation[] tesTransportationsArray = new Transportation[7]; // --- step 4 creating arrays ----
         tesTransportationsArray[0] = f1; 
@@ -1076,11 +1302,33 @@ public class driver {
         int testTransportCount = 7;
 
         // --- Step 1: Create accommodations ---
-        Hotel h1 = new Hotel("Hilton", "Paris", 100, 4, 20);
-        Hotel h2 = new Hotel("Imperia", "Montreal", 120, 5, 25);
 
-        Hostel hs1 = new Hostel("Auberge du Plateau", "Paris", 50, 3, 10);
-        Hostel hs2 = new Hostel("HostelCo", "Toronto", 60, 4, 15);
+        Hotel h1 = null;
+        try {
+            h1= new Hotel("Hilton", "Paris", 100, 4, 20);
+        } catch (InvalidAccommodationDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        Hotel h2 = null;
+        try {
+          h2  = new Hotel("Imperia", "Montreal", 120, 5, 25);
+        } catch (InvalidAccommodationDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        Hostel hs1 = null;
+        try {
+            hs1= new Hostel("Auberge du Plateau", "Paris", 50, 3, 10);
+        } catch (InvalidAccommodationDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+        Hostel hs2 = null;
+        try {
+          hs2 = new Hostel("HostelCo", "Toronto", 60, 4, 15);
+        } catch (InvalidAccommodationDataException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
 
         Accommadation[] testAccommadations = new Accommadation[4]; // --- step 4 creating arrays ----
         testAccommadations[0] = h1; 
@@ -1090,9 +1338,29 @@ public class driver {
         int testAccommadationCount = 4;
 
         // --- Step 1: Create trips ---
-        Trip tr1 = new Trip("Paris", 5, 200, c1, f1, h1);
-        Trip tr2 = new Trip("Toronto", 4, 150, c2, t1, hs1);
-        Trip tr3 = new Trip("Montreal", 6, 180, c3, b1, h2);
+        Trip tr1 = null;
+        try {
+           tr1 = new Trip("Paris", 5, 200, c1, f1, h1);
+        } catch (InvalidTripDataException ex) {
+            System.out.println("Error:" +ex.getMessage());
+        }
+
+        Trip tr2 = null;
+        try {
+            tr2 = new Trip("Toronto", 4, 150, c2, t1, hs1);
+        } catch (InvalidTripDataException ex) {
+            System.out.println("Error:" +ex.getMessage());
+        }
+
+        Trip tr3 = null;
+        try {
+           tr3 = new Trip("Montreal", 6, 180, c3, b1, h2);
+        } catch (InvalidTripDataException ex) {
+            System.out.println("Error:" +ex.getMessage());
+        }
+        
+       
+         
 
         Trip[] testTripArray = new Trip[3]; // --- step 4 creating arrays ----
         testTripArray[0] = tr1; 
@@ -1129,7 +1397,13 @@ public class driver {
         System.out.println("\nequals method on these 2 object is: "+f1.equals(f2)); 
 
         // Compare objects of the same class with identical attributes
-        Flight f3 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);// creating copy of f2 to compare against
+          Flight f3 = null;
+          try {
+              f3 = new Flight("WestJet", "Toronto", "New York", "WestJet", 25, 180, 40);// creating copy of f2 to compare against
+          } catch (InvalidTransportDataException ex) {
+          System.out.println("Error:" +ex.getMessage());
+          }
+       
         tesTransportationsArray[6] = f3;
         System.out.println("\nTwo Flights with identical attributes:");
         System.out.println(f2.toString()+"\n"+f3.toString());
@@ -1146,9 +1420,19 @@ public class driver {
                 Accommadation accommodation = trip.getAccommadation();
 
                 double transportCost = transport.calculateTotalCost(trip.getDuration());
-                double accommodationCost = accommodation.calculateTotalCost(trip.getDuration());
+                double accommodationCost = 0;
+                try {
+                    accommodationCost = accommodation.calculateTotalCost(trip.getDuration());
+                } catch (InvalidAccommodationDataException ex) {
+                    System.out.println("Error:" +ex.getMessage());
+                }
 
-                double totalCost = trip.calculateTotalCost(trip.getDuration()); 
+                double totalCost = 0;
+                try {
+                    totalCost = trip.calculateTotalCost(trip.getDuration()); 
+                } catch (InvalidAccommodationDataException ex) {
+                    System.out.println("Error:" +ex.getMessage());
+                }
 
                 System.out.println("\nTrip to " + trip.getDestination() +
                                 " for client " + trip.getClient().getFirstName());
@@ -1162,9 +1446,19 @@ public class driver {
         // --- Displaying most Expensive "test" trip ---
         System.out.println("\n------ Displaying most Expensive test trip ------");
         Trip expensiveTrip = testTripArray[0];
-                double highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                double highestCost = 0;
+                try {
+                    expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
+                } catch (InvalidAccommodationDataException ex) {
+                    System.out.println("Error:" +ex.getMessage());
+                }
                 for (int i =0; i < testTripCount;i++){
-                    double tempCost = testTripArray[i].calculateTotalCost(testTripArray[i].getDuration());
+                    double tempCost = 0;
+                    try {
+                        testTripArray[i].calculateTotalCost(testTripArray[i].getDuration());
+                    } catch (InvalidAccommodationDataException ex) {
+                        System.out.println("Error:" +ex.getMessage());
+                    }
                     if (tempCost > highestCost){
                         highestCost =tempCost;
                         expensiveTrip = testTripArray[i];

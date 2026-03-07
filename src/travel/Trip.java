@@ -1,5 +1,7 @@
 package travel;
 import client.Client;
+import exceptions.*;
+
 
 public class Trip {
 
@@ -24,7 +26,11 @@ public class Trip {
     nextId++;
   }
 
-  public Trip(String destination, int duration, double basePrice, Client client,Transportation transportation, Accommadation accommadation) {
+  public Trip(String destination, int duration, double basePrice, Client client,Transportation transportation, Accommadation accommadation) throws InvalidTripDataException{
+    if (basePrice < 100.00) throw new InvalidTripDataException("Base price must be greater than or equal to 100.00$");
+    if (duration < 1 || duration > 20) throw new InvalidTripDataException("Duration must be between 1-20 days");
+    if (client == null) throw new InvalidTripDataException("Client does not exist in system");
+
     this.destination = destination;
     this.duration = duration;
     this.basePrice = basePrice;
@@ -46,8 +52,9 @@ public class Trip {
     this.accommadation = other.accommadation;
   }
 
-  public double calculateTotalCost(int numberOfDays) {
+  public double calculateTotalCost(int numberOfDays) throws InvalidAccommodationDataException{
     double total = 0;
+    if (numberOfDays <= 0 ) throw new InvalidAccommodationDataException("Number of days needs to be greater to or equal to 1");
     total = basePrice*numberOfDays;
     if (transportation != null) {
         total += transportation.calculateTotalCost(numberOfDays);
@@ -88,14 +95,17 @@ public class Trip {
     this.destination = destination;
   }
 
-  public void setDuration(int duration) {
+  public void setDuration(int duration) throws InvalidTripDataException{
+    if (duration < 1 || duration > 20) throw new InvalidTripDataException("Duration must be between 1-20 days");
     this.duration = duration;
   }
 
-  public void setBasePrice(double basePrice) {
+  public void setBasePrice(double basePrice) throws InvalidTripDataException{
+    if (basePrice < 100.00) throw new InvalidTripDataException("Base price must be greater than or equal to 100.00$");
     this.basePrice = basePrice;
   }
-  public void setClient(Client client){
+  public void setClient(Client client) throws InvalidTripDataException{
+    if (client == null) throw new InvalidTripDataException("Client does not exist in system");
     this.client = client;
   }
   public void setTransportation(Transportation transportation){
@@ -107,12 +117,18 @@ public class Trip {
 
  @Override
 public String toString() {
+    double totalCost =0;
+    try {
+        totalCost = calculateTotalCost(duration);
+    } catch (InvalidAccommodationDataException ex) {
+      System.out.println("Error: "+ex.getMessage());
+    }
 
     String result = "\nTrip id: " + tripId +
                     "\nDestination: " + destination +
                     "\nDuration: " + duration +
                     "\nBase Price: " + basePrice +
-                    "\nTotal Cost: " + calculateTotalCost(duration);
+                    "\nTotal Cost: " + totalCost;
 
     if (transportation != null) {
         result += "\n" + transportation.toString();
@@ -190,7 +206,7 @@ public boolean equals(Object obj) {
         return false;
     }
 
-    if (this.basePrice != compare.basePrice) {
+    if (Double.compare(this.basePrice, compare.basePrice) != 0) {
         return false;
     }
 

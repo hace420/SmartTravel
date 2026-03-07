@@ -1,4 +1,5 @@
 package client;
+import exceptions.InvalidClientDataException;
 
 public class Client {
   private static int nextid = 1001;
@@ -16,7 +17,19 @@ public class Client {
     nextid++;
   }
 
-  public Client(String firstName, String lastName, String emailAddress) {
+  public Client(String firstName, String lastName, String emailAddress) throws InvalidClientDataException {
+
+    if (firstName == null || firstName.isEmpty() || firstName.length() > 50)
+        throw new InvalidClientDataException("Invalid first name");
+
+    if (lastName == null || lastName.isEmpty() || lastName.length() > 50)
+        throw new InvalidClientDataException("Invalid last name");
+
+    if (emailAddress == null || emailAddress.length() > 100 ||
+        !emailAddress.contains("@") || !emailAddress.contains(".") || emailAddress.contains(" "))
+        throw new InvalidClientDataException("Invalid email format");
+    
+
     this.firstName = firstName;
     this.lastName = lastName;
     this.emailAddress = emailAddress;
@@ -33,19 +46,31 @@ public class Client {
   }
 
   // setters
-  public void setFirstName(String firstName) {
+  public void setFirstName(String firstName) throws InvalidClientDataException {
+    if (firstName == null || firstName.isEmpty() || firstName.length() > 50)
+        throw new InvalidClientDataException("Invalid first name");
     this.firstName = firstName;
+
   }
 
-  public void setLastName(String lastName) {
+  public void setLastName(String lastName) throws InvalidClientDataException{
+    if (lastName == null || lastName.isEmpty() || lastName.length() > 50)
+        throw new InvalidClientDataException("Invalid last name");
     this.lastName = lastName;
   }
 
-  public void setEmailAddress(String emailAddress) {
+  public void setEmailAddress(String emailAddress) throws InvalidClientDataException{
+    if (emailAddress == null || emailAddress.length() > 100 ||
+        !emailAddress.contains("@") || !emailAddress.contains(".") || emailAddress.contains(" "))
+        throw new InvalidClientDataException("Invalid email format");
     this.emailAddress = emailAddress;
   }
 
   // getters
+  public String getClientID(){
+    return clientID;
+  }
+
   public String getFirstName() {
     return firstName;
   }
@@ -60,7 +85,7 @@ public class Client {
 
   @Override
   public String toString() {
-    return ("Cleint Id: " + clientID +
+    return ("Client Id: " + clientID +
         "\nFirst name: " + firstName +
         "\nLast name: " + lastName +
         "\nEmail Address: " + emailAddress);

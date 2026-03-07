@@ -1,4 +1,5 @@
 package travel;
+import exceptions.*;
 
 public class Flight extends Transportation {
     private String airlineName;
@@ -15,7 +16,8 @@ public class Flight extends Transportation {
         luggageCost =0;
     }
 
-    public Flight(String companyName, String departureCity, String arrivalCity, String airlineName, double luggageAllowance, double luggageCost, double ticketCost) {
+    public Flight(String companyName, String departureCity, String arrivalCity, String airlineName, double luggageAllowance, double luggageCost, double ticketCost) throws InvalidTransportDataException{
+        if (luggageAllowance < 0) throw new InvalidTransportDataException("Luggage allowance must be greater or equal to 0");
         super(companyName, departureCity, arrivalCity); 
         this.airlineName = airlineName;
         this.luggageAllowance = luggageAllowance;
@@ -35,7 +37,8 @@ public class Flight extends Transportation {
 public void setAirlineName(String airlineName){
     this.airlineName =airlineName;
 }
-public void setLuggageAllowance(double luggageAllowance){
+public void setLuggageAllowance(double luggageAllowance) throws InvalidTransportDataException {
+    if (luggageAllowance < 0) throw new InvalidTransportDataException("Luggage allowance must be greater or equal to 0");
     this.luggageAllowance = luggageAllowance;
 }
 public void setTicketCost(double ticketCost){
