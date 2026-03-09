@@ -14,7 +14,13 @@ public class AccommodationFileManager {
             
             for (int i=0;i<count;i++){
                 Accommadation a = accommadations[i];
-                pw.println();
+                if (a instanceof Hostel) {
+                    pw.println(
+                        "HOSTEL;"+a.getAccommId()+";"+a.getName()+
+                        ";"+a.getLocation()+";"+a.get
+
+                    );
+                }
             }
         } catch (Exception e) {
         }
