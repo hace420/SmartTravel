@@ -26,6 +26,13 @@ public abstract  class Accommadation {
         this.AccommId = "A" + nextId;
         nextId++;
     }
+    public Accommadation(String AccommId,String name,String location,double pricePerNight)throws InvalidAccommodationDataException{    
+        if (pricePerNight < 0) throw new InvalidAccommodationDataException("Price must be at a minimum of 0$");
+        this.name = name;
+        this.location = location;
+        this.pricePerNight = pricePerNight;
+        this.AccommId = AccommId;
+    }
     public Accommadation(Accommadation other){
         this.name = other.name;
         this.location = other.location;
@@ -47,6 +54,9 @@ public abstract  class Accommadation {
     }
 
     // getters
+    public String getAccommId(){
+        return AccommId;
+    }
     public String getName(){
         return name;
     }
@@ -83,6 +93,9 @@ public abstract  class Accommadation {
         this.location.equalsIgnoreCase(compare.location) &&
         this.pricePerNight == compare.pricePerNight) return true;
         else return false;
+    }
+    public static void updateAccommId(int id){
+        nextId = id;
     }
 
 

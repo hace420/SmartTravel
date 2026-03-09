@@ -18,6 +18,13 @@ public class Hostel extends Accommadation {
         this.fees =fees;
 
     }
+    public Hostel(String AccommId,String name,String location,double pricePerNight,int numberOfBeds,double fees)throws InvalidAccommodationDataException{
+        if (pricePerNight > 150) throw new InvalidAccommodationDataException("Price per night for Hostel is at the most 150$");
+        super(AccommId,name, location, pricePerNight);
+        this.numberOfBeds = numberOfBeds;
+        this.fees =fees;
+
+    }
     public Hostel(Hostel other){
         super(other);
         this.numberOfBeds = other.numberOfBeds;
@@ -51,7 +58,8 @@ public class Hostel extends Accommadation {
 
     @Override
     public String toString(){
-        return super.toString() + 
+        return "HOSTEL\n"+
+        super.toString() + 
         "\nNumber of beds: " + numberOfBeds +
         "\nFees: " + fees;
     }

@@ -17,6 +17,12 @@ public class Hotel extends Accommadation{
         this.numberOfStars = numberOfStars;
         this.serviceFees = serviceFees;
     }
+    public Hotel(String AccommId,String name,String location,double pricePerNight,int numberOfStars,double serviceFees)throws InvalidAccommodationDataException{
+        if (numberOfStars < 1 || numberOfStars >5) throw new InvalidAccommodationDataException("Stars must be between 1-5");
+        super(AccommId,name, location, pricePerNight);
+        this.numberOfStars = numberOfStars;
+        this.serviceFees = serviceFees;
+    }
     public Hotel(Hotel other){
         super(other);
         this.numberOfStars = other.numberOfStars;
@@ -49,7 +55,8 @@ public class Hotel extends Accommadation{
 
     @Override
     public String toString(){
-        return super.toString() +
+        return  "HOTEL\n"+
+                super.toString() +
                 "\nNumber of stars(1-5): " + numberOfStars +
                 "\nService fees: " + serviceFees;
     }

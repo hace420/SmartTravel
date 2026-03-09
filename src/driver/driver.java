@@ -8,7 +8,10 @@
 package driver;
 import client.*;
 import exceptions.*;
+import java.io.IOException;
 import java.util.Scanner;
+import persistence.ClientFileManager;
+import persistence.ErrorLogger;
 import travel.*;
 
 public class driver {
@@ -23,20 +26,11 @@ public class driver {
     private static int accommadationCount = 0;
     public static void main(String[] args) {
 
-        int menuChoice = 0;
+        
         Scanner in = new Scanner(System.in);
+        menuDriven(in);
 
-        System.out.println("Select between \n1. Menu driven interface \n2. Predefined (hard-coded) testing scenario");
-        menuChoice = in.nextInt();
-        in.nextLine();
-
-        if (menuChoice == 1){
-            menuDriven(in);
-        } else if (menuChoice ==2){
-            predefinedScenerio(in);
-        } else {
-            System.out.println("\nInvalid choice!");
-        }
+        
     
     }
 //----------------------------------
@@ -52,6 +46,11 @@ public class driver {
             System.out.println("\n3. Transportation Management");
             System.out.println("\n4. Accommodation Management");
             System.out.println("\n5. Additional Operations");
+            System.out.println("\n6. List All Data Summary (Prints all the trip data)");
+            System.out.println("\n7. Load All Data (output/data/*.csv) (Loads all data from csvs and logs errors if any)");
+            System.out.println("\n8. Save All Data (output/data/*.csv) (Saves all data from csvs and logs errors if any)");
+            System.out.println("\n9. Run Predefined Scenario (Hardcode clients, trips, transports, accommodations to show all exceptions)");
+            System.out.println("\n10. Generate Dashboard ← HTML + charts (Generates charts and complete dashboard)");
             System.out.println("\n0. Exit");
             System.out.print("\nChoice: ");
             choice = in.nextInt();
@@ -63,6 +62,10 @@ public class driver {
                 case 3: transportationMenu(in); break;
                 case 4: accommodationMenu(in); break;
                 case 5: additionalMenu(in); break;
+                case 6: listTrips();break;
+                case 7: loadAllData();break;
+                case 8: saveAllData();break;
+                case 9: predefinedScenerio(in);break;
             }
 
         } while (choice != 0);
@@ -1107,6 +1110,35 @@ public class driver {
 
     } while (choice != 5);
     }
+
+//----------------------------------
+// LOAD ALL DATA 
+//----------------------------------
+    private static void loadAllData() {
+        try {
+            int newCount = ClientFileManager.loadClients(clients);
+            clientCount = newCount;
+            System.out.println("Clients loaded successfully. Total clients: " + clientCount);
+           
+        } catch (IOException e) {
+            ErrorLogger.log("Error loading clients: " + e.getMessage());
+            System.out.println("Error loading clients. Check logs.");
+        }
+    } 
+    
+//----------------------------------
+// SAVE ALL DATA 
+//----------------------------------
+    private static void saveAllData() {
+        try {
+            ClientFileManager.saveClients(clients, clientCount);
+            System.out.println("Clients saved successfully.");
+           
+        } catch (IOException e) {
+            ErrorLogger.log("Error saving clients: " + e.getMessage());
+            System.out.println("Error saving clients. Check logs.");
+        }
+    }
 // --- HELPER METHODS ---
     // method for cleint menu to list clients
     public static void listClients(){
@@ -1198,20 +1230,7 @@ public class driver {
     }
     return trips[index];
     } 
-// --- Find Transportation by index (EntityNotFoundException handled) ---
-    private static Transportation findTransportationByIndex(int index) throws EntityNotFoundException {
-    if (index < 0 || index >= transportCount) {
-        throw new EntityNotFoundException("Error: Transportation not found");
-    }
-    return transportations[index];
-    }
-// --- Find Accommodation by index (EntityNotFoundException handled) ---
-    private static Accommadation findAccommodationByIndex(int index) throws EntityNotFoundException {
-    if (index < 0 || index >= accommadationCount) {
-        throw new EntityNotFoundException("Error: Accommodation not found");
-    }
-    return accommadations[index];
-    }
+
 // --- Checking for duyplicate emails (DuplicateEmailException handled ) ---
     private static boolean emailDuplicateCheck(String email, Client currentClient) {
     for (int i = 0; i < clientCount; i++) {

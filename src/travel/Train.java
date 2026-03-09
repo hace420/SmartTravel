@@ -20,6 +20,13 @@ public class Train extends Transportation {
         this.seatClass = seatClass;
         this.trainCost = trainCost;
     }
+    public Train(String tripId,String companyName, String departureCity, String arrivalCity,
+                 TrainType trainType, SeatClass seatClass, double trainCost) {
+        super(tripId,companyName, departureCity, arrivalCity);
+        this.trainType = trainType;
+        this.seatClass = seatClass;
+        this.trainCost = trainCost;
+    }
 
     public Train(Train other) {
         super(other);

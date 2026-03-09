@@ -36,6 +36,25 @@ public class Client {
     this.clientID = "C" + nextid;
     nextid++;
   }
+  // used for file loading and keeping same generated id user wiull be promted to always load data first before any new data is created to avoid issues
+  public Client(String clientId,String firstName, String lastName, String emailAddress) throws InvalidClientDataException {
+
+    if (firstName == null || firstName.isEmpty() || firstName.length() > 50)
+        throw new InvalidClientDataException("Invalid first name");
+
+    if (lastName == null || lastName.isEmpty() || lastName.length() > 50)
+        throw new InvalidClientDataException("Invalid last name");
+
+    if (emailAddress == null || emailAddress.length() > 100 ||
+        !emailAddress.contains("@") || !emailAddress.contains(".") || emailAddress.contains(" "))
+        throw new InvalidClientDataException("Invalid email format");
+    
+
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.emailAddress = emailAddress;
+    this.clientID = clientId;
+  }
 
   public Client(Client other){
     this.firstName = other.firstName;
@@ -113,5 +132,9 @@ public class Client {
       return false;
     }
   }
+  // used for file loading to preserve count of id 
+  public static void updateNextID(int next) {
+    nextid = next;
+}
 
 }

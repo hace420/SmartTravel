@@ -28,6 +28,13 @@ public abstract class Transportation {
 
 
   }
+  // used for file loading/saving
+  public Transportation(String tripId, String companyName, String departureCity, String arrivalCity){
+    this.companyName = companyName;
+    this.departureCity = departureCity;
+    this.arrivalCity = arrivalCity;
+    this.tripId = tripId;
+  }
 
   public Transportation(Transportation other){
     this.companyName = other.companyName;
@@ -39,6 +46,7 @@ public abstract class Transportation {
   }
 
   // setters
+  
   public void setCompanyName(String companyName){
     this.companyName = companyName;
   }
@@ -50,6 +58,10 @@ public abstract class Transportation {
   }
 
   //getters 
+
+  public String getTripId(){
+    return tripId;
+  }
   public String getCompanyName(){
     return companyName;
   }
@@ -87,6 +99,11 @@ public abstract class Transportation {
         this.departureCity.equalsIgnoreCase(compare.departureCity) &&
         this.arrivalCity.equalsIgnoreCase(compare.arrivalCity)) return true;
         else return false;
+  }
+
+  // used for file loading/saving to keep tripid count
+  public static void updateTripId(int id){
+    nextId = id;
   }
 
 
