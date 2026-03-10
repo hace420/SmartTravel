@@ -365,7 +365,8 @@ public class driver {
                 // --- select accommodation if any ---
                 Accommadation acc = null;
                 System.out.println("Do you want to add a accommodation (y or n)");
-                String answer = in.nextLine();
+                String answer = in.next();
+                in.nextLine();
                 if (answer.equalsIgnoreCase("y")){
                     System.out.println("Enter company name");
                     String name = in.nextLine();
@@ -423,16 +424,16 @@ public class driver {
                 }
                 if (tripCount < trips.length) {
                     try {
-                        trips[tripCount++] = new Trip(destination, duration, basePrice, selectedClient, transport, acc);
+                        Trip newTrip = new Trip(destination, duration, basePrice, selectedClient, transport, acc);
+                        trips[tripCount] = newTrip;
+                        tripCount++;
                         System.out.println("Trip successfully created!");
                     } catch (InvalidTripDataException ex) {
-                         System.out.println("Error: "+ex.getMessage());
+                        System.out.println("Error: " + ex.getMessage());
                     }
-                
-                
-                } else {
-                System.out.println("Trip list is full!");
-                }
+                        } else {
+                            System.out.println("Trip list is full!");
+                        }
                 break;
             case 2:
                 // edit trip 
@@ -1149,7 +1150,7 @@ public class driver {
     } 
 
     // mehtod for trip menu to list all trips
-    public static void listTrips() {
+   public static void listTrips() {
     if (tripCount == 0) {
         System.out.println("No trips available.");
         return;
@@ -1157,26 +1158,29 @@ public class driver {
 
     System.out.println("Trips list:");
     for (int i = 0; i < tripCount; i++) {
+
+        if (trips[i] == null) {
+            continue;
+        }
+
         Trip t = trips[i];
+
         System.out.println(i + ". Destination: " + t.getDestination() +
                 " | Duration: " + t.getDuration() +
                 " | Client: " + t.getClient().getFirstName() + " " + t.getClient().getLastName());
 
-        // show full transportation details
         if (t.getTransportation() != null) {
             System.out.println("    Transportation Details:\n" + t.getTransportation());
         } else {
             System.out.println("    Transportation: None");
         }
 
-        // show full accommodation details
         if (t.getAccommadation() != null) {
             System.out.println("    Accommodation Details:\n" + t.getAccommadation());
         } else {
             System.out.println("    Accommodation: None");
         }
     }
-    
 }
 // --- deep copy transportation array ---
     public static Transportation[] copyTransportationArray(Transportation[] original) {
