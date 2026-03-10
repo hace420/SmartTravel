@@ -1,9 +1,10 @@
 package persistence;
 
 import travel.*;
-import exceptions.InvalidTransportDataException;
+import exceptions.*;
 import java.io.*;
 import java.util.Scanner;
+import client.*;
 
 public class TransportationFileManager {
 
@@ -56,7 +57,7 @@ public class TransportationFileManager {
                 try {
                     Transportation t = null;
                     switch (type) {
-                        case "Bus":
+                        case "BUS":
                             if (tokens.length != 8) {
                                 ErrorLogger.log("Invalid Bus line (expected 8 fields): " + line);
                                 continue;
@@ -67,7 +68,7 @@ public class TransportationFileManager {
                             t = new Bus(id, company, depart, arrive, busCompany, stops, busCost);
                             break;
 
-                        case "Flight":
+                        case "FLIGHT":
                             if (tokens.length != 9) {
                                 ErrorLogger.log("Invalid Flight line (expected 9 fields): " + line);
                                 continue;
@@ -79,7 +80,7 @@ public class TransportationFileManager {
                             t = new Flight(id, company, depart, arrive, airline, luggageAllow, ticket, luggageCost);
                             break;
 
-                        case "Train":
+                        case "TRAIN":
                             if (tokens.length != 8) {
                                 ErrorLogger.log("Invalid Train line (expected 8 fields): " + line);
                                 continue;
@@ -101,7 +102,7 @@ public class TransportationFileManager {
                     }
                     transports[count++] = t;
 
-                    // Extract numeric part from ID (assuming format "TR" + digits)
+                    // Extract numeric part from ID
                     int numId = Integer.parseInt(id.substring(2));
                     if (numId > maxId) maxId = numId;
 
