@@ -10,8 +10,11 @@ import client.*;
 import exceptions.*;
 import java.io.IOException;
 import java.util.Scanner;
+import persistence.AccommodationFileManager;
 import persistence.ClientFileManager;
 import persistence.ErrorLogger;
+import persistence.TransportationFileManager;
+import persistence.TripFileManager;
 import travel.*;
 
 public class driver {
@@ -41,18 +44,19 @@ public class driver {
         int choice=0;
         do {
             System.out.println("\n===== SMART TRAVEL SYSTEM =====");
-            System.out.println("\n1. Client Management");
-            System.out.println("\n2. Trip Management");
-            System.out.println("\n3. Transportation Management");
-            System.out.println("\n4. Accommodation Management");
-            System.out.println("\n5. Additional Operations");
-            System.out.println("\n6. List All Data Summary (Prints all the trip data)");
-            System.out.println("\n7. Load All Data (output/data/*.csv) (Loads all data from csvs and logs errors if any)");
-            System.out.println("\n8. Save All Data (output/data/*.csv) (Saves all data from csvs and logs errors if any)");
-            System.out.println("\n9. Run Predefined Scenario (Hardcode clients, trips, transports, accommodations to show all exceptions)");
-            System.out.println("\n10. Generate Dashboard ← HTML + charts (Generates charts and complete dashboard)");
-            System.out.println("\n0. Exit");
-            System.out.print("\nChoice: ");
+            System.out.print("\nPLEASE NOTE BEFORE ANY DATA IS CREATED USE MENU OPTION 7 TO LOAD DATA, ANY DATA THAT IS CRETAED BEFORE PREVIOUS DATA IS LOADED WILL BE LOST\n");
+            System.out.print("\n1. Client Management");
+            System.out.print("\n2. Trip Management");
+            System.out.print("\n3. Transportation Management");
+            System.out.print("\n4. Accommodation Management");
+            System.out.print("\n5. Additional Operations");
+            System.out.print("\n6. List All Data Summary ");
+            System.out.print("\n7. Load All Data ");
+            System.out.print("\n8. Save All Data ");
+            System.out.print("\n9. Run Predefined Scenario ");
+            System.out.print("\n10. Generate Dashboard ← HTML + charts ");
+            System.out.print("\n0. Exit");
+            System.out.println("\n\nChoice: ");
             choice = in.nextInt();
             in.nextLine();
 
@@ -112,6 +116,7 @@ public class driver {
                 }
                 } catch (InvalidClientDataException ex) {
                     System.out.println("Error: "+ex.getMessage());
+                    ErrorLogger.log("Error invalid first name "+ex.getMessage());
                 } catch (DuplicateEmailException ex){
                     System.out.println("Error: "+ex.getMessage());
                 }
@@ -149,6 +154,7 @@ public class driver {
                             clients[choice].setFirstName(f);
                         } catch (InvalidClientDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
+                            ErrorLogger.log("Error invalid first name "+ex.getMessage());
                         }                      
                         break;
 
@@ -1115,31 +1121,64 @@ public class driver {
 //----------------------------------
 // LOAD ALL DATA 
 //----------------------------------
-    private static void loadAllData() {
-        try {
-            int newCount = ClientFileManager.loadClients(clients);
-            clientCount = newCount;
-            System.out.println("Clients loaded successfully. Total clients: " + clientCount);
-           
-        } catch (IOException e) {
-            ErrorLogger.log("Error loading clients: " + e.getMessage());
-            System.out.println("Error loading clients. Check logs.");
-        }
-    } 
-    
+private static void loadAllData() {
+    // Reset counts to avoid mixing with existing data
+    clientCount = 0;
+    accommadationCount = 0;
+    transportCount = 0;
+    tripCount = 0;
+
+    try {
+        // Load clients 
+        clientCount = ClientFileManager.loadClients(clients);
+        System.out.println("Clients loaded: " + clientCount);
+
+        //  Load accommodations 
+        accommadationCount = AccommodationFileManager.loadAccommodations(accommadations, 0);
+        System.out.println("Accommodations loaded: " + accommadationCount);
+
+        //  Load transports 
+        transportCount = TransportationFileManager.loadTransportations(transportations);
+        System.out.println("Transports loaded: " + transportCount);
+
+        //  Load trips 
+        tripCount = TripFileManager.loadTrips(trips, clients, clientCount,
+                                              transportations, transportCount,
+                                              accommadations, accommadationCount);
+        System.out.println("Trips loaded: " + tripCount);
+
+        System.out.println("All data loaded successfully.");
+    } catch (IOException ex) {
+        ErrorLogger.log("Error loading data: " + ex.getMessage());
+        System.out.println("Error loading data. Check logs.");
+    }
+}
+
 //----------------------------------
 // SAVE ALL DATA 
 //----------------------------------
-    private static void saveAllData() {
-        try {
-            ClientFileManager.saveClients(clients, clientCount);
-            System.out.println("Clients saved successfully.");
-           
-        } catch (IOException e) {
-            ErrorLogger.log("Error saving clients: " + e.getMessage());
-            System.out.println("Error saving clients. Check logs.");
-        }
+private static void saveAllData() {
+    try {
+        ClientFileManager.saveClients(clients, clientCount);
+        System.out.println("Clients saved.");
+
+        AccommodationFileManager.saveAccommodations(accommadations, accommadationCount);
+        System.out.println("Accommodations saved.");
+
+        TransportationFileManager.saveTransportations(transportations, transportCount);
+        System.out.println("Transports saved.");
+
+        TripFileManager.saveTrips(trips, tripCount, clients, clientCount,
+                                  transportations, transportCount,
+                                  accommadations, accommadationCount);
+        System.out.println("Trips saved.");
+
+        System.out.println("All data saved successfully.");
+    } catch (IOException ex) {
+        ErrorLogger.log("Error saving data: " + ex.getMessage());
+        System.out.println("Error saving data. Check logs.");
     }
+}
 // --- HELPER METHODS ---
     // method for cleint menu to list clients
     public static void listClients(){

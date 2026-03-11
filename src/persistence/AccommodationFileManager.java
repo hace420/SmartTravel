@@ -16,6 +16,7 @@ public class AccommodationFileManager {
             
             for (int i=0;i<count;i++){
                 Accommadation a = accommadations[i];
+                if (a == null) continue;
                 if (a instanceof Hostel) {
                     pw.println(
                         "HOSTEL;"+a.getAccommId()+";"+a.getName()+
@@ -32,14 +33,14 @@ public class AccommodationFileManager {
                 }
             }
         } catch (InvalidAccommodationDataException ex) {
-            System.out.println("Error: "+ex.getMessage());
+            ErrorLogger.log("Error invalid data saved."+ex.getMessage());
         }
         
     }
 
     public static int loadAccommodations(Accommadation[] accommadations, int count)throws IOException {
-        int idCount =0;
-        int maxID=0;
+        int loadedCount = count;
+        int maxId = 0;
         File file = new File(ACCOMM_FILE);
         if (!file.exists()) return 0;
         try (Scanner sc = new Scanner(file)){
@@ -47,7 +48,7 @@ public class AccommodationFileManager {
                 String line = sc.nextLine().trim();
                 if (line.isEmpty()) continue;
                 String[] tokens = line.split(";");
-                if(!(tokens.length == 7)) { // validating if all information is present in string
+                if(tokens.length != 7) {
                     ErrorLogger.log("Invalid accommodation line: " + line);
                     continue;
                 }
@@ -55,41 +56,67 @@ public class AccommodationFileManager {
                 String AccommID = tokens[1];
                 String name = tokens[2];
                 String location = tokens[3];
-                double pricePerNight = Double.parseDouble(tokens[4]);
+                double pricePerNight;
+                try {
+                    pricePerNight = Double.parseDouble(tokens[4]);
+                } catch (NumberFormatException ex) {
+                    ErrorLogger.log("Invalid price per night stored in line: "+ex.getMessage());
+                    continue;
+                }
+                
                 try {
                     Accommadation a = null;
                     switch (type) {
                     case "HOTEL":
-                        double serviceFees = Double.parseDouble(tokens[5]);
-                        int numberOfStars = Integer.parseInt(tokens[6]);
+                        double serviceFees;
+                        int numberOfStars;
+                        try {
+                            serviceFees = Double.parseDouble(tokens[5]);                        
+                            numberOfStars = Integer.parseInt(tokens[6]);
+                        } catch (NumberFormatException ex) {
+                            ErrorLogger.log("Error reading data from file numbers not stored correctly."+ex.getMessage());
+                            continue;
+                        }
                         a = new Hotel(AccommID, name, location, pricePerNight,numberOfStars,serviceFees);                        
                         break;
                     case "HOSTEL":
-                        double fees = Double.parseDouble(tokens[5]);
-                        int numberOfBeds = Integer.parseInt(tokens[6]);
+                        double fees;
+                        int numberOfBeds;
+                        try {
+                            fees = Double.parseDouble(tokens[5]);
+                            numberOfBeds = Integer.parseInt(tokens[6]);
+                        } catch (NumberFormatException ex) {
+                            ErrorLogger.log("Error reading data from file numbers not stored correctly."+ex.getMessage());
+                            continue;
+                        }
                         a = new Hostel(AccommID,name,location,pricePerNight,numberOfBeds,fees);
                         break;
                     default:
-                        ErrorLogger.log("Unknown transport type: " + type);
+                        ErrorLogger.log("Unknown Accommodation type: " + type);
                         continue;
-                }
-                // Check if array has space
-                    if (count >= accommadations.length) {
+                    }
+                    if (loadedCount >= accommadations.length) {
                         ErrorLogger.log("Accommodation array full, cannot load more.");
                         break;
                     }
                     
-                    accommadations[count] = a;
-                    count++;
+                    accommadations[loadedCount] = a;
+                    loadedCount++;
+                    try {
+                        int numId = Integer.parseInt(AccommID.substring(1));
+                        if (numId > maxId) maxId = numId;
+                    } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                        ErrorLogger.log("Invalid accommodation ID format: " + AccommID);
+                    }
                 } catch (InvalidAccommodationDataException ex) {
                     ErrorLogger.log("Invalid Accommodation type"+ex.getMessage());
                 }
-                
             }
-        } 
-        return count;
-      
-
-        
+        }
+        if (loadedCount > count) {
+            
+             Accommadation.updateAccommId(maxId + 1);
+        }
+        return loadedCount;
     }
 }
