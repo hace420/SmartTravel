@@ -10,27 +10,17 @@ import client.*;
 import exceptions.*;
 import java.io.IOException;
 import java.util.Scanner;
-import persistence.AccommodationFileManager;
-import persistence.ClientFileManager;
-import persistence.ErrorLogger;
-import persistence.TransportationFileManager;
-import persistence.TripFileManager;
+import persistence.*;
 import travel.*;
 import visualization.TripChartGenerator;
+import service.*;
 
 public class driver {
-    private static Client[] clients = new Client[50];       // initializing arrays for storing information
-    private static Trip[] trips = new Trip[50];
-    private static Transportation[] transportations = new Transportation[50];
-    private static Accommadation[] accommadations = new Accommadation[50];
-
-    private static int clientCount = 0;                  // used to track if space is available in array 
-    private static int tripCount = 0;
-    private static int transportCount = 0;
-    private static int accommadationCount = 0;
+    private static SmartTravelService service;
+    
     public static void main(String[] args) {
 
-        
+        service = new SmartTravelService();
         Scanner in = new Scanner(System.in);
         menuDriven(in);
 
@@ -68,8 +58,8 @@ public class driver {
                 case 4: accommodationMenu(in); break;
                 case 5: additionalMenu(in); break;
                 case 6: listTrips();break;
-                case 7: loadAllData();break;
-                case 8: saveAllData();break;
+                case 7: service.loadAllData();break;
+                case 8: service.saveAllData();break;
                 case 9: predefinedScenerio(in);break;
                 case 10: generateDashboard();break;
             }
@@ -105,23 +95,17 @@ public class driver {
                 String email = in.nextLine();
 
                 try {
-                    if (emailDuplicateCheck(email, null)) {
-                        throw new DuplicateEmailException("Email "+email+" is already registered to a client");
-                    }
-                    Client newClient = new Client(first, last, email);
-                if (clientCount < clients.length) {
-                    clients[clientCount] = newClient;
-                    clientCount++;
-                    System.out.println("Client " + first + " " + last + " added successfully!");
-                } else {
-                    System.out.println("Client list is full!");
-                }
+                    service.addClient(first, last, email);
+                    System.out.println("Client added successfully!");
                 } catch (InvalidClientDataException ex) {
                     System.out.println("Error: "+ex.getMessage());
-                    ErrorLogger.log("Error invalid first name "+ex.getMessage());
+                    ErrorLogger.log(ex.getMessage());
                 } catch (DuplicateEmailException ex){
                     System.out.println("Error: "+ex.getMessage());
+                    ErrorLogger.log(ex.getMessage());
                 }
+                
+                
                 
                 break;
 
@@ -132,16 +116,11 @@ public class driver {
                 choice = in.nextInt();
                 in.nextLine();
                 // checking if choice is valid
-                try {
-                    findClientByIndex(choice);
-                } catch (EntityNotFoundException ex) {
-                    System.out.println("Error: Client not found");
-                    break;
+                if (choice < 0 || choice >= service.getClientCount()){
+                    System.out.println("Invalid index");
                 }
-                
-               
-    
-
+                Client c = service.getClients()[choice]; 
+                            
                 System.out.println("Would you like to edit 1. First name 2. Last name 3. Email address");
                 int choice2 = 0;
                 choice2 = in.nextInt();
@@ -153,7 +132,7 @@ public class driver {
                         System.out.println("Enter first name: ");
                         f = in.nextLine();
                         try {
-                            clients[choice].setFirstName(f);
+                            c.setFirstName(f);
                         } catch (InvalidClientDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
                             ErrorLogger.log("Error invalid first name "+ex.getMessage());
@@ -165,7 +144,7 @@ public class driver {
                         System.out.println("Enter last name: ");
                         l = in.nextLine();
                         try {
-                            clients[choice].setLastName(l);
+                            c.setLastName(l);
                         } catch (InvalidClientDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
                         }
@@ -176,9 +155,10 @@ public class driver {
                         System.out.println("Enter email address: ");
                         e = in.nextLine();
                         try {
-                            if (emailDuplicateCheck(e, null)) {
-                            throw new DuplicateEmailException("Email "+e+" is already registered to a client");}
-                            clients[choice].setEmailAddress(e);
+                            if (service.duplicateEmailCheck(e)) {
+                            throw new DuplicateEmailException("Email "+e+" is already registered to a client");
+                            }
+                            c.setEmailAddress(e);
                         } catch (InvalidClientDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
                         } catch (DuplicateEmailException ex){
@@ -198,23 +178,13 @@ public class driver {
                 choice3 = in.nextInt();
                 in.nextLine();
 
-                 try {
-                    findClientByIndex(choice3);
-                } catch (EntityNotFoundException ex) {
-                    System.out.println("Error: Client not found");
-                    break;
+                // checking if choice is valid
+                if (choice3 < 0 || choice3 >= service.getClientCount()){
+                    System.out.println("Invalid index");
                 }
-                //moving all elemeents in array one position to the left starting at index of client that needs to be removed
-                // this "deletes" the cleint at that index but will cause last 2 elements to be duplicates
-                // avoid null in the middle of array
-                for (int i = choice3; i < clientCount-1;i++){
-                    clients[i] = clients[i+1];
-                }
-                // clears last duplicate client at the highest index of array
-                clients[clientCount-1] = null;
-               
-                clientCount--;
-                System.out.println("Client deleted successfully!");
+                Client client = service.getClients()[choice3]; 
+                String cId = client.getClientID();
+                service.deleteClient(cId); 
 
                 break;
 
@@ -252,8 +222,8 @@ public class driver {
             in.nextLine();
 
             switch (tripChoice) {
-                case 1 :
-                    // --- Trip destination , duration and price ---
+                case 1:
+                    // --- Trip destination, duration, price ---
                     System.out.print("Enter trip destination: ");
                     String destination = in.nextLine();
                     System.out.print("Enter trip duration (days): ");
@@ -264,40 +234,38 @@ public class driver {
                     in.nextLine();
 
                     // --- Select client ---
-                    listClients();
+                    listClients();  // make sure this uses service
                     System.out.print("Select client index: ");
                     int clientIndex = in.nextInt();
                     in.nextLine();
-                    // chekcing for valid client index
-                        try {
-                        findClientByIndex(clientIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Client not found");
-                        break;
+
+                    // Validate client index
+                    if (clientIndex < 0 || clientIndex >= service.getClientCount()) {
+                        System.out.println("Invalid client index.");
+                        break;  // exit case 1
                     }
+                    Client selectedClient = service.getClients()[clientIndex];
+                    String clientId = selectedClient.getClientID();
 
-                    Client selectedClient = clients[clientIndex];
-
-                    // -- Select Transport if any -- 
-
+                    // --- Select Transport (optional) ---
                     Transportation transport = null;
+                    String transportId = null;  // will be set if transport added
                     System.out.print("Do you want to add transportation? (y/n): ");
                     String addTransport = in.nextLine();
-                        if (addTransport.equalsIgnoreCase("y")) {
-                            System.out.println("Select transportation type: 1. Flight 2. Train 3. Bus");
-                            int transportType = in.nextInt();
-                             in.nextLine();
-    
-                             System.out.print("Enter company name: ");
-                             String company = in.nextLine();
-                             System.out.print("Enter departure city: ");
-                             String depart = in.nextLine();
-                             System.out.print("Enter arrival city: ");
-                             String arrive = in.nextLine();
+                    if (addTransport.equalsIgnoreCase("y")) {
+                        System.out.println("Select transportation type: 1. Flight 2. Train 3. Bus");
+                        int transportType = in.nextInt();
+                        in.nextLine();
 
-                            switch (transportType) {
-                            case 1:
-                                // Flight-specific attributes
+                        System.out.print("Enter company name: ");
+                        String company = in.nextLine();
+                        System.out.print("Enter departure city: ");
+                        String depart = in.nextLine();
+                        System.out.print("Enter arrival city: ");
+                        String arrive = in.nextLine();
+
+                        switch (transportType) {
+                            case 1: // Flight
                                 System.out.print("Enter airline name: ");
                                 String airline = in.nextLine();
                                 System.out.print("Enter luggage allowance: ");
@@ -309,162 +277,146 @@ public class driver {
                                 in.nextLine();
                                 try {
                                     transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                                    service.addTransportation(transport);
+                                    transportId = transport.getTripId();
                                 } catch (InvalidTransportDataException ex) {
-                                    System.out.println("Error: "+ ex.getMessage());
+                                    System.out.println("Error: " + ex.getMessage());
                                 }
-                                
-                                    break;
-                            case 2:
-                                // Train-specific attributes
-                                System.out.println("Enter train type (1. High-speed 2. Long-Distance 3.Economy)");
+                                break;
+
+                            case 2: // Train
+                                System.out.println("Enter train type (1. High-speed 2. Long-Distance 3. Economy)");
                                 int type = in.nextInt();
-                                TrainType trainType = TrainType.ECONOMY; // default choice
+                                TrainType trainType = TrainType.ECONOMY;
                                 switch (type) {
-                                    case 1 : trainType = TrainType.HIGH_SPEED;break;
-                                    case 2 : trainType = TrainType.LONG_DISTANCE;break;
-                                    case 3 : trainType = TrainType.ECONOMY;break;
-                                    default:
-                                        System.out.println("Invalid option!");break;
+                                    case 1: trainType = TrainType.HIGH_SPEED; break;
+                                    case 2: trainType = TrainType.LONG_DISTANCE; break;
+                                    case 3: trainType = TrainType.ECONOMY; break;
+                                    default: System.out.println("Invalid option, defaulting to Economy.");
                                 }
-                                System.out.println("Enter seat class (1. First class 2. Bussiness 3. Economy)");
+                                System.out.println("Enter seat class (1. First class 2. Business 3. Economy)");
                                 int seat = in.nextInt();
                                 SeatClass seatclass = SeatClass.ECONOMY;
                                 switch (seat) {
-                                    case 1 : seatclass = SeatClass.FIRST_CLASS;break;
-                                    case 2 : seatclass = SeatClass.BUSINESS;break;
-                                    case 3 : seatclass = SeatClass.ECONOMY;break;
-                                    default:
-                                        System.out.println("Invalid option!");break;
+                                    case 1: seatclass = SeatClass.FIRST_CLASS; break;
+                                    case 2: seatclass = SeatClass.BUSINESS; break;
+                                    case 3: seatclass = SeatClass.ECONOMY; break;
+                                    default: System.out.println("Invalid option, defaulting to Economy.");
                                 }
-                                System.out.println("Enter train cost");
+                                System.out.print("Enter train cost: ");
                                 double cost = in.nextDouble();
-
-                                transport = new Train(company, depart, arrive,trainType,seatclass,cost);
-                                 break;
-                            case 3:
-                                // Bus-specific attributes
-
-                                System.out.println("Enter bus company name");
-                                String n = in.nextLine();
-                                System.out.println("Enter number of stops bus will make");
-                                int stops = in.nextInt();
                                 in.nextLine();
-                                System.out.println("Enter bus cost (base 20$ with surcharge of 1$ extra for every stop)");
-                                double c = in.nextDouble();
+                                transport = new Train(company, depart, arrive, trainType, seatclass, cost);
+                                service.addTransportation(transport);
+                                transportId = transport.getTripId();
+                                break;
+
+                            case 3: // Bus
+                                System.out.print("Enter bus company name: ");
+                                String busName = in.nextLine();
+                                System.out.print("Enter number of stops: ");
+                                int stops = in.nextInt();
+                                System.out.print("Enter bus cost (base 20$ + 1$ per stop): ");
+                                double busCost = in.nextDouble();
                                 in.nextLine();
                                 try {
-                                    transport = new Bus(company, depart, arrive, n, stops, c);
+                                    transport = new Bus(company, depart, arrive, busName, stops, busCost);
+                                    service.addTransportation(transport);
+                                    transportId = transport.getTripId();
                                 } catch (InvalidTransportDataException ex) {
-                                    System.out.println("Error: "+ex.getMessage());
+                                    System.out.println("Error: " + ex.getMessage());
                                 }
-                                
                                 break;
+
+                            default:
+                                System.out.println("Invalid transport type.");
+                                break;
+                        }
+                    }
+
+                    // --- Select Accommodation (optional) ---
+                    Accommadation accommodation = null;
+                    String accommodationId = null;  // will be set if accommodation added
+                    System.out.print("Do you want to add accommodation? (y/n): ");
+                    String answer = in.nextLine();
+                    if (answer.equalsIgnoreCase("y")) {
+                        System.out.print("Enter company name: ");
+                        String name = in.nextLine();
+                        System.out.print("Enter price per night: ");
+                        double price = in.nextDouble();
+                        in.nextLine();
+                        System.out.print("Enter location: ");
+                        String location = in.nextLine();
+
+                        System.out.println("Choose accommodation type: 1. Hotel  2. Hostel");
+                        int accChoice = in.nextInt();
+                        in.nextLine();
+
+                        switch (accChoice) {
+                            case 1: // Hotel
+                                System.out.print("Enter number of stars (1-5): ");
+                                int stars = in.nextInt();
+                                in.nextLine();
+                                System.out.print("Enter service fees (one-time): ");
+                                double fees = in.nextDouble();
+                                in.nextLine();
+                                try {
+                                    accommodation = new Hotel(name, location, price, stars, fees);
+                                    service.addAccommodation(accommodation);
+                                    accommodationId = accommodation.getAccommId();
+                                } catch (InvalidAccommodationDataException ex) {
+                                    System.out.println("Error: " + ex.getMessage());
                                 }
-                            if (transportCount < transportations.length){
-                                 transportations[transportCount] = transport;
-                                 transportCount++;
-                            } else {
-                                System.out.println("No more trips can be entered the list is full");
-                            }
-                            
+                                break;
 
+                            case 2: // Hostel
+                                System.out.print("Enter number of beds: ");
+                                int beds = in.nextInt();
+                                in.nextLine();
+                                System.out.print("Enter additional fees: ");
+                                double fee = in.nextDouble();
+                                in.nextLine();
+                                try {
+                                    accommodation = new Hostel(name, location, price, beds, fee);
+                                    service.addAccommodation(accommodation);
+                                    accommodationId = accommodation.getAccommId();
+                                } catch (InvalidAccommodationDataException ex) {
+                                    System.out.println("Error: " + ex.getMessage());
+                                }
+                                break;
+
+                            default:
+                                System.out.println("Invalid choice.");
+                                break;
                         }
-                
-                // --- select accommodation if any ---
-                Accommadation acc = null;
-                System.out.println("Do you want to add a accommodation (y or n)");
-                String answer = in.next();
-                in.nextLine();
-                if (answer.equalsIgnoreCase("y")){
-                    System.out.println("Enter company name");
-                    String name = in.nextLine();
-                    System.out.println("Enter price per night");
-                    double price = in.nextDouble();
-                    in.nextLine();
-                    System.out.println("Enter location");
-                    String location = in.nextLine();
-
-                    System.out.println("Please choose between 1. Hotel or 2. Hostel for acommodation");
-                    int accChoice = in.nextInt();
-                    in.nextLine();
-                    switch (accChoice) {
-                        case 1:
-                            // Hotel attributes
-                            System.out.println("Enter number of stars (1-5)");
-                            int stars = in.nextInt();
-                            in.nextLine();
-                            System.out.println("Enter service fees (fees will only be charged once not per night)");
-                            double fees = in.nextDouble();
-                            in.nextLine();
-
-                            try {
-                            acc = new Hotel(name, location, price, stars, fees); 
-                            } catch (InvalidAccommodationDataException ex) {
-                                 System.out.println("Error: "+ex.getMessage());
-                            }
-                                                    
-                            break;
-                        case 2:
-                            // Hostel attributes
-                            System.out.println("Enter number of beds");
-                            int beds = in.nextInt();
-                            in.nextLine();
-                            System.out.println("Enter additional fees");
-                            double fee = in.nextDouble();
-                            in.nextLine();
-                            try {
-                                acc = new Hostel(name, location, price, beds, fee);
-                            } catch (InvalidAccommodationDataException ex) {
-                                System.out.println("Error: "+ex.getMessage());
-                            }
-                            
-                            break;                            
-                        default:
-                            System.out.println("Invalid option!");break;
-                    }
-                    if (accommadationCount < accommadations.length){
-                        accommadations[accommadationCount] = acc;
-                        accommadationCount++;
-                    } else {
-                        System.out.println("Accommodation list full cannot add more");
                     }
 
-                }
-                if (tripCount < trips.length) {
+                    // --- Create the trip using the service ---
                     try {
-                        Trip newTrip = new Trip(destination, duration, basePrice, selectedClient, transport, acc);
-                        trips[tripCount] = newTrip;
-                        tripCount++;
+                        service.createTrip(destination, duration, basePrice, clientId, transportId, accommodationId);
                         System.out.println("Trip successfully created!");
-                    } catch (InvalidTripDataException ex) {
-                        System.out.println("Error: " + ex.getMessage());
+                    } catch (InvalidTripDataException | EntityNotFoundException e) {
+                        System.out.println("Error creating trip: " + e.getMessage());
+                        ErrorLogger.log(e.getMessage());
+                    } catch (IllegalStateException e) {
+                        System.out.println("Error: " + e.getMessage());
+                        ErrorLogger.log(e.getMessage());
                     }
-                        } else {
-                            System.out.println("Trip list is full!");
-                        }
-                break;
+                    break;
             case 2:
                 // edit trip 
-                
-                if (tripCount == 0) {
-                        System.out.println("No trips available to edit.");
-                        break;
-                    }
-
-                    listTrips();
+                listTrips();
 
                     System.out.print("Select trip index to edit: ");
                     int editIndex = in.nextInt();
                     in.nextLine();
-
-                    try {
-                        findTripByIndex(editIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
+                    // Validate index
+                    if (editIndex < 0 || editIndex >= service.getTripCount()) {
+                        System.out.println("Invalid trip index.");
                         break;
-                    }
+                    }                
 
-                    Trip tripToEdit = trips[editIndex];
+                    
 
                     System.out.println("Edit options:");
                     System.out.println("1. Destination");
@@ -475,13 +427,17 @@ public class driver {
 
                     int editChoice = in.nextInt();
                     in.nextLine();
+                    Trip tripToEdit = service.getTrips()[editIndex];
+                    boolean updated = false;
 
                     switch (editChoice) {
+                        
 
                         case 1:
                             System.out.print("Enter new destination: ");
                             String newDest = in.nextLine();
                             tripToEdit.setDestination(newDest);
+                            updated = true;
                             break;
 
                         case 2:
@@ -490,6 +446,7 @@ public class driver {
                             in.nextLine();
                             try {
                                 tripToEdit.setDuration(newDuration);
+                                updated = true;
                             } catch (InvalidTripDataException ex) {
                                 System.out.println("Error: "+ex.getMessage());
                             }
@@ -502,6 +459,7 @@ public class driver {
                             in.nextLine();
                             try {
                                 tripToEdit.setBasePrice(newPrice);
+                                updated = true;
                             } catch (InvalidTripDataException ex) {
                                 System.out.println("Error: "+ex.getMessage());
                             }
@@ -513,16 +471,18 @@ public class driver {
                             System.out.print("Select new client index: ");
                             int newClientIndex = in.nextInt();
                             in.nextLine();
-
+                             // Validate index
+                                if (newClientIndex < 0 || newClientIndex >= service.getClientCount()) {
+                                    System.out.println("Invalid client index.");
+                                    break;
+                                }  
+                            Client client = service.getClients()[newClientIndex];
                             try {
-                                Client newClient = findClientByIndex(newClientIndex);
-                                tripToEdit.setClient(newClient);
+                                tripToEdit.setClient(client);
+                                updated = true;
                                 System.out.println("Client updated successfully!");
                             } catch (InvalidTripDataException ex) {
                                 System.out.println("Error: " + ex.getMessage());
-                                break;
-                            } catch (EntityNotFoundException ex) {
-                                System.out.println("Error: Client not found");
                                 break;
                             }
 
@@ -535,31 +495,21 @@ public class driver {
                         default:
                             System.out.println("Invalid option.");
                     }
-
+                    if (updated){
                     System.out.println("Trip updated successfully.");
+                    }
+                   
                     break;
             case 3:
                 listTrips();
                 System.out.println("Select trip you would like to delete by entering the trips index number");
                 int index = in.nextInt();
                 in.nextLine();
-                try {
-                    findTripByIndex(index);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
-                        break;
-                    }
-                //moving all elemeents in array one position to the left starting at index of trip that needs to be removed
-                // this "deletes" the cleint at that index but will cause last 2 elements to be duplicates
-                // avoid null in the middle of array
-                for (int i = index; i < tripCount-1;i++){
-                    trips[i] = trips[i+1];
+                if (index < 0 || index >= service.getTripCount()){
+                    System.out.println("Invalid index");
                 }
-                // clears last duplicate client at the highest index of array
-                trips[tripCount-1] = null;
-               
-                tripCount--;
-                System.out.println("Trip deleted successfully!");
+                Trip trip = service.getTrips()[index];
+                service.deleteTrip(trip);
                 break;
 
             case 4:
@@ -569,19 +519,17 @@ public class driver {
             System.out.println("Enter index of client to search for");
             int searchIndex = in.nextInt();
             in.nextLine();
-            try {
-                findClientByIndex(searchIndex);
-                } catch (EntityNotFoundException ex) {
-                    System.out.println("Error: Client not found");
+            if (searchIndex < 0 || searchIndex >= service.getClientCount()){
+                    System.out.println("Invalid index");
                     break;
                 }
-            
-              
-            
             boolean found = false;
-            Client selectedClient1 = clients[searchIndex];
-            System.out.println("Trips found for client "+ clients[searchIndex].toString());
-            for (int i = 0; i < tripCount;i++ ){
+            Client selectedClient1 = service.getClients()[searchIndex];
+            Trip[] trips = service.getTrips();
+
+            System.out.println("Trips found for client "+ selectedClient1.toString());
+            for (int i = 0; i < service.getTripCount();i++ ){
+                
                 if (trips[i].getClient() == selectedClient1) {
                     try {
                         System.out.println("Destonation: " + trips[i].getDestination()+
@@ -622,24 +570,17 @@ public class driver {
         switch (menuChoice) {
             case 1:
                 // --- adding trips ---
-                if (tripCount == 0) {
-                 System.out.println("No trips available to add transportation.");
-                 return;
-                }
-
                     System.out.println("Select trip you would like to add transportation to:");
                     listTrips();
                     int tripIndex = in.nextInt();
                     in.nextLine();
-
-                    try {
-                    findTripByIndex(tripIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
-                        break;
+                    if (tripIndex < 0 || tripIndex >= service.getTripCount()){
+                    System.out.println("Invalid index");
+                    break;
                     }
 
-                    Trip selectedTrip = trips[tripIndex];
+
+                    Trip selectedTrip = service.getTrips()[tripIndex];
                     Transportation transport = null;
 
                     // --- choosing tranport type --- 
@@ -668,6 +609,7 @@ public class driver {
                         in.nextLine();
                         try {
                             transport = new Flight(company, depart, arrive, airline, luggage, ticketCost, luggageCost);
+                            service.addTransportation(transport);
                         } catch (InvalidTransportDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
                         }
@@ -695,7 +637,12 @@ public class driver {
                         System.out.println("Enter train cost:");
                         double cost = in.nextDouble();
                         in.nextLine();
-                        transport = new Train(company, depart, arrive, trainType, seatclass, cost);
+                        try {
+                            transport = new Train(company, depart, arrive, trainType, seatclass, cost);
+                            service.addTransportation(transport);
+                        } catch (InvalidTransportDataException ex) {
+                            System.out.println("Error: "+ex.getMessage());
+                        }
                         break;
 
                     case 3:
@@ -710,6 +657,7 @@ public class driver {
                         
                         try {
                             transport = new Bus(company, depart, arrive, busName, stops, busCost);
+                            service.addTransportation(transport);
                         } catch (InvalidTransportDataException ex) {
                             System.out.println("Error: "+ex.getMessage());
                         }
@@ -718,64 +666,54 @@ public class driver {
 
                         default:
                         System.out.println("Invalid transportation type!");
-                        return;
+                        break;
                     }
 
-                    // Add transport to global array (
-                    if (transportCount < transportations.length) {
-                        transportations[transportCount++] = transport;
-                    } else {
-                        System.out.println("Transportation list is full!");
-                    }
+                    
 
                     // adding transport to trip
-                    selectedTrip.setTransportation(transport); 
-
+                    if (transport != null) {
+                    selectedTrip.setTransportation(transport);
                     System.out.println("Transportation added to trip successfully!");
+                    } else {
+                        System.out.println("Transportation could not be created.");
+                    }
                    
                     break;
             case 2:
                 // remove a transport option
-                if (transportCount == 0){
-                    System.out.println("No transportations options available to remove");break;
-                }
                 System.out.println("Select index of trip you would like to remove transportation from");
                 listTrips();
                 int tripRemoveIndex = in.nextInt();
                 in.nextLine();
-                try {
-                    findTripByIndex(tripRemoveIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
-                        break;
+                if (tripRemoveIndex < 0 || tripRemoveIndex >= service.getTripCount()){
+                    System.out.println("Invalid index");
+                    break;
                     }
-                Trip tripToRemoveTransport = trips[tripRemoveIndex];
+                Trip tripToRemoveTransport = service.getTrips()[tripRemoveIndex];
 
                 if (tripToRemoveTransport.getTransportation() == null) {
                     System.out.println("This trip has no transportation assigned.");break;                    
                 }
 
                 Transportation toRemove = tripToRemoveTransport.getTransportation();
+                String id = toRemove.getTripId();
 
-                // removing specific transportaion option from global array
-                for (int i = 0; i < transportCount; i++) {
-                if (transportations[i] == toRemove) {
-                    // shift remaining elements left
-                    for (int j = i; j < transportCount - 1; j++) {
-                        transportations[j] = transportations[j + 1];
-                    }
-                    transportations[transportCount - 1] = null;
-                    transportCount--;
-                    break;
-                    }              
-                }
+                
                 // removing tranportation option from specified trip
                 tripToRemoveTransport.setTransportation(null);
+                
+                try {
+                    service.removeTransportation(id);
+                } catch (EntityNotFoundException ex) {
+                    ErrorLogger.log(ex.getMessage());
+                }
+
                 System.out.println("Transportation removed from trip successfully!");
                 break;
             case 3:
                 // Listing options
-                if (transportCount == 0) {
+                if (service.getTransportCount() == 0) {
                 System.out.println("No transportation options available.");
                 break;
                 }
@@ -787,10 +725,15 @@ public class driver {
 
                 int typeChoice = in.nextInt();
                 in.nextLine();
+                if (typeChoice < 1 || typeChoice > 3) {
+                    System.out.println("Invalid selection.");
+                    break;
+                }
                 boolean found = false;
+                int transportCount = service.getTransportCount();
 
                 for (int i = 0; i < transportCount; i++){
-                    Transportation temp = transportations[i];
+                    Transportation temp = service.getTransportations()[i];
                     switch (typeChoice) {
                         case 1 :
                             // search for flight
@@ -844,116 +787,113 @@ public class driver {
     switch (menuChoice) {
         case 1:
             // adding accommodation
-            if (tripCount == 0) {
-                 System.out.println("No trips available to add accommadation.");
-                 return;
+            
+                if (service.getTripCount() == 0) {
+                    System.out.println("No trips available to add accommodation.");
+                    break; // or return if you want to exit the menu entirely
                 }
 
-                    System.out.println("Select trip you would like to add accommadation to:");
-                    listTrips();
-                    int tripIndex = in.nextInt();
-                    in.nextLine();
+                System.out.println("Select trip you would like to add accommodation to:");
+                listTrips();
+                int tripIndex = in.nextInt();
+                in.nextLine();
 
-                    try {
-                    findTripByIndex(tripIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
+                if (tripIndex < 0 || tripIndex >= service.getTripCount()) {
+                    System.out.println("Invalid index.");
+                    break;
+                }
+
+                Trip selectedTrip = service.getTrips()[tripIndex];
+                Accommadation acc = null;
+
+                System.out.print("Enter company name: ");
+                String name = in.nextLine();
+                System.out.print("Enter price per night: ");
+                double price = in.nextDouble();
+                in.nextLine();
+                System.out.print("Enter location: ");
+                String location = in.nextLine();
+
+                System.out.println("Choose accommodation type:");
+                System.out.println("1. Hotel");
+                System.out.println("2. Hostel");
+                int accChoice = in.nextInt();
+                in.nextLine();
+
+                switch (accChoice) {
+                    case 1: // Hotel
+                        System.out.print("Enter number of stars (1-5): ");
+                        int stars = in.nextInt();
+                        in.nextLine();
+                        System.out.print("Enter service fees (one-time): ");
+                        double fees = in.nextDouble();
+                        in.nextLine();
+                        try {
+                            acc = new Hotel(name, location, price, stars, fees);
+                            service.addAccommodation(acc);
+                        } catch (InvalidAccommodationDataException ex) {
+                            System.out.println("Error: " + ex.getMessage());
+                        }
                         break;
-                    }
 
-                    Trip selectedTrip = trips[tripIndex];
-                    Accommadation acc = null;
+                    case 2: // Hostel
+                        System.out.print("Enter number of beds: ");
+                        int beds = in.nextInt();
+                        in.nextLine();
+                        System.out.print("Enter additional fees: ");
+                        double fee = in.nextDouble();
+                        in.nextLine();
+                        try {
+                            acc = new Hostel(name, location, price, beds, fee);
+                            service.addAccommodation(acc);
+                        } catch (InvalidAccommodationDataException ex) {
+                            System.out.println("Error: " + ex.getMessage());
+                        }
+                        break;
 
-                    System.out.println("Enter company name");
-                    String name = in.nextLine();
-                    System.out.println("Enter price per night");
-                    double price = in.nextDouble();
-                    in.nextLine();
-                    System.out.println("Enter location");
-                    String location = in.nextLine();
+                    default:
+                        System.out.println("Invalid option.");
+                        break;
+                }
 
-                    System.out.println("Please choose between 1. Hotel or 2. Hostel for acommodation");
-                    int accChoice = in.nextInt();
-                    in.nextLine();
-                    switch (accChoice) {
-                        case 1:
-                            // Hotel attributes
-                            System.out.println("Enter number of stars (1-5)");
-                            int stars = in.nextInt();
-                            in.nextLine();
-                            System.out.println("Enter service fees (fees will only be charged once not per night)");
-                            double fees = in.nextDouble();
-                            in.nextLine();
-                            try {
-                                acc = new Hotel(name, location, price, stars, fees);  
-                            } catch (InvalidAccommodationDataException ex) {
-                                System.out.println("Error: "+ex.getMessage());
-                            }
-                                                   
-                            break;
-                        case 2:
-                            // Hostel attributes
-                            System.out.println("Enter number of beds");
-                            int beds = in.nextInt();
-                            in.nextLine();
-                            System.out.println("Enter additional fees");
-                            double fee = in.nextDouble();
-                            in.nextLine();
-                            try {
-                                acc = new Hostel(name, location, price, beds, fee);
-                            } catch (InvalidAccommodationDataException ex) {
-                                System.out.println("Error: "+ex.getMessage());
-                            }
-                            
-                            break;                            
-                        default:
-                            System.out.println("Invalid option!");return;
-                    }
-                    if (accommadationCount < accommadations.length){
-                        accommadations[accommadationCount] = acc;
-                        accommadationCount++;
-                        selectedTrip.setAccommadation(acc);
-                        System.out.println("Acommodation added to trip!");
-                    } else {
-                        System.out.println("Accommodation list full cannot add more");
-                    }
+                if (acc != null) {
+                    selectedTrip.setAccommadation(acc);
+                    System.out.println("Accommodation added to trip successfully!");
+                } else {
+                    System.out.println("Accommodation could not be created.");
+                }
                 break;
         case 2:
             // remove accommadation
-            if (accommadationCount ==0){
+            if (service.getAccommodationCount() ==0){
                 System.out.println("There are no accommadation available to remove");break;
             }
             System.out.println("Enter index of trip you would like the accommdation to be removed from");
             listTrips();
             int accRemoveIndex = in.nextInt();
             in.nextLine();
-            try {
-                    findTripByIndex(accRemoveIndex);
-                    } catch (EntityNotFoundException ex) {
-                        System.out.println("Error: Trip not found");
-                        break;
-                    }
+            if (accRemoveIndex < 0 || accRemoveIndex >= service.getTripCount()) {
+                    System.out.println("Invalid index.");
+                    break;
+                }
 
-            Trip tripRemoveAcc = trips[accRemoveIndex];
+            Trip tripRemoveAcc = service.getTrips()[accRemoveIndex];
             if (tripRemoveAcc.getAccommadation() == null){
                 System.out.println("There is no accommadation assigned to this trip");break;
             }
             Accommadation accTemp = tripRemoveAcc.getAccommadation();
-            // removing specific accommadation option from global array
-                for (int i = 0; i < accommadationCount; i++) {
-                if (accommadations[i] == accTemp) {
-                    // shift remaining elements left
-                    for (int j = i; j < accommadationCount - 1; j++) {
-                        accommadations[j] = accommadations[j + 1];
-                    }
-                    accommadations[accommadationCount - 1] = null;
-                    accommadationCount--;
-                    break;
-                    }              
-                }
+            String accommId = accTemp.getAccommId();
+            
                 // removing tranportation option from specified trip
-                tripRemoveAcc.setAccommadation(null);
-                System.out.println("Accommadation removed from trip successfully!");
+                try {
+                    service.removeAccommodation(accommId);
+                    // If we reach here, removal succeeded
+                    tripRemoveAcc.setAccommadation(null); // remove from trip
+                    System.out.println("Accommodation removed from trip successfully!");
+                } catch (EntityNotFoundException ex) {
+                    ErrorLogger.log(ex.getMessage());
+                    System.out.println("Error: Accommodation could not be removed from system.");
+                }
                 break;
         case 3:
              // Listing options
@@ -1120,92 +1060,32 @@ public class driver {
     } while (choice != 5);
     }
 
-//----------------------------------
-// LOAD ALL DATA 
-//----------------------------------
-private static void loadAllData() {
-    // Reset counts to avoid mixing with existing data
-    clientCount = 0;
-    accommadationCount = 0;
-    transportCount = 0;
-    tripCount = 0;
 
-    try {
-        // Load clients 
-        clientCount = ClientFileManager.loadClients(clients);
-        System.out.println("Clients loaded: " + clientCount);
 
-        //  Load accommodations 
-        accommadationCount = AccommodationFileManager.loadAccommodations(accommadations, 0);
-        System.out.println("Accommodations loaded: " + accommadationCount);
 
-        //  Load transports 
-        transportCount = TransportationFileManager.loadTransportations(transportations);
-        System.out.println("Transports loaded: " + transportCount);
-
-        //  Load trips 
-        tripCount = TripFileManager.loadTrips(trips, clients, clientCount,
-                                              transportations, transportCount,
-                                              accommadations, accommadationCount);
-        System.out.println("Trips loaded: " + tripCount);
-
-        System.out.println("All data loaded successfully.");
-    } catch (IOException ex) {
-        ErrorLogger.log("Error loading data: " + ex.getMessage());
-        System.out.println("Error loading data. Check logs.");
-    }
-}
-
-//----------------------------------
-// SAVE ALL DATA 
-//----------------------------------
-private static void saveAllData() {
-    try {
-        ClientFileManager.saveClients(clients, clientCount);
-        System.out.println("Clients saved.");
-
-        AccommodationFileManager.saveAccommodations(accommadations, accommadationCount);
-        System.out.println("Accommodations saved.");
-
-        TransportationFileManager.saveTransportations(transportations, transportCount);
-        System.out.println("Transports saved.");
-
-        TripFileManager.saveTrips(trips, tripCount, clients, clientCount,
-                                  transportations, transportCount,
-                                  accommadations, accommadationCount);
-        System.out.println("Trips saved.");
-
-        System.out.println("All data saved successfully.");
-    } catch (IOException ex) {
-        ErrorLogger.log("Error saving data: " + ex.getMessage());
-        System.out.println("Error saving data. Check logs.");
-    }
-}
 // --- HELPER METHODS ---
     // method for cleint menu to list clients
     public static void listClients(){
         System.out.println("Clients list:");
-        for (int i = 0; i < clientCount; i++) {
-        System.out.println(i + ". " + clients[i].getFirstName() + " " + clients[i].getLastName() + " " + clients[i].getEmailAddress());
+        Client[] clients = service.getClients();
+        for (int i=0;i<service.getClientCount();i++){
+            System.out.println(clients[i]);
         }
     } 
 
     // mehtod for trip menu to list all trips
    public static void listTrips() {
-    if (tripCount == 0) {
+    int count = service.getTripCount();
+    if (count == 0) {
         System.out.println("No trips available.");
         return;
     }
 
     System.out.println("Trips list:");
-    for (int i = 0; i < tripCount; i++) {
+    Trip[] trips = service.getTrips();
 
-        if (trips[i] == null) {
-            continue;
-        }
-
-        Trip t = trips[i];
-
+    for (int i = 0; i < count; i++) {
+        Trip t = trips[i];  // get the trip at index i
         System.out.println(i + ". Destination: " + t.getDestination() +
                 " | Duration: " + t.getDuration() +
                 " | Client: " + t.getClient().getFirstName() + " " + t.getClient().getLastName());
@@ -1223,6 +1103,9 @@ private static void saveAllData() {
         }
     }
 }
+
+    
+
 // --- deep copy transportation array ---
     public static Transportation[] copyTransportationArray(Transportation[] original) {
 
@@ -1250,42 +1133,7 @@ private static void saveAllData() {
 
     return copy;
   }
-// --- Find Client by email (EntityNotFoundException handled) ---
-    private static Client findClientByEmail(String email) throws EntityNotFoundException {
-    for (int i = 0; i < clientCount; i++) {
-        if (clients[i].getEmailAddress().equalsIgnoreCase(email)) {
-            return clients[i];
-        }
-    }
-    throw new EntityNotFoundException("Error: Client not found");
-    }
 
-// --- Find Client by index (EntityNotFoundException handled) ---
-    private static Client findClientByIndex(int index) throws EntityNotFoundException {
-    if (index < 0 || index >= clientCount) {
-        throw new EntityNotFoundException("Error: Client not found");
-    }
-    return clients[index];
-    }
-
-// --- Find Trip by index (EntityNotFoundException handled) ---
-    private static Trip findTripByIndex(int index) throws EntityNotFoundException {
-    if (index < 0 || index >= tripCount) {
-        throw new EntityNotFoundException("Error: Trip not found");
-    }
-    return trips[index];
-    } 
-
-// --- Checking for duyplicate emails (DuplicateEmailException handled ) ---
-    private static boolean emailDuplicateCheck(String email, Client currentClient) {
-    for (int i = 0; i < clientCount; i++) {
-        if (clients[i] != currentClient && 
-            clients[i].getEmailAddress().equalsIgnoreCase(email)) {
-            return true;
-        }
-    }
-    return false;
-}
     //----------------------------------
     // Chart generation
     //----------------------------------
