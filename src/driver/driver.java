@@ -71,7 +71,7 @@ public class driver {
                 case 7: loadAllData();break;
                 case 8: saveAllData();break;
                 case 9: predefinedScenerio(in);break;
-                //case 10: generateDashboard();break;
+                case 10: generateDashboard();break;
             }
 
         } while (choice != 0);
