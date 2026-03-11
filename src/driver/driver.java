@@ -16,6 +16,7 @@ import persistence.ErrorLogger;
 import persistence.TransportationFileManager;
 import persistence.TripFileManager;
 import travel.*;
+import visualization.TripChartGenerator;
 
 public class driver {
     private static Client[] clients = new Client[50];       // initializing arrays for storing information
@@ -70,6 +71,7 @@ public class driver {
                 case 7: loadAllData();break;
                 case 8: saveAllData();break;
                 case 9: predefinedScenerio(in);break;
+                //case 10: generateDashboard();break;
             }
 
         } while (choice != 0);
@@ -1284,6 +1286,33 @@ private static void saveAllData() {
     }
     return false;
 }
+    //----------------------------------
+    // Chart generation
+    //----------------------------------
+
+
+        private static void generateDashboard() {
+            if (tripCount == 0) {
+                System.out.println("No trips available to generate charts.");
+                return;
+            }
+
+            try {
+                TripChartGenerator.generateCostBarChart(trips, tripCount);
+                System.out.println("Cost bar chart saved to output/trip_cost_bar_chart.png");
+
+                TripChartGenerator.generateDestinationPieChart(trips, tripCount);
+                System.out.println("Destination pie chart saved to output/trips_per_destination_pie.png");
+
+                TripChartGenerator.generateDurationLineChart(trips, tripCount);
+                System.out.println("Duration line chart saved to output/trip_duration_line_chart.png");
+
+                System.out.println("All charts generated successfully.");
+            } catch (IOException e) {
+                System.out.println("Error saving charts: " + e.getMessage());
+                ErrorLogger.log("Chart generation error: " + e.getMessage());
+            }
+        }
 
   
     //----------------------------------
