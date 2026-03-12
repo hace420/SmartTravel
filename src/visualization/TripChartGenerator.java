@@ -74,7 +74,7 @@ public class TripChartGenerator {
                 dataset
         );
         applyChartStyling(chart);
-        ChartUtils.saveChartAsPNG(new File("output/trip_cost_bar_chart.png"), chart, 800, 600);
+        ChartUtils.saveChartAsPNG(new File("output/charts/trip_cost_bar_chart.png"), chart, 800, 600);
     }
 
     public static void generateDestinationPieChart(Trip[] trips, int count) throws IOException {
@@ -97,7 +97,7 @@ public class TripChartGenerator {
                 false
         );
         applyChartStyling(chart);
-        ChartUtils.saveChartAsPNG(new File("output/trips_per_destination_pie.png"), chart, 800, 600);
+        ChartUtils.saveChartAsPNG(new File("output/charts/trips_per_destination_pie.png"), chart, 800, 600);
     }
 
     public static void generateDurationLineChart(Trip[] trips, int count) throws IOException {
@@ -121,6 +121,6 @@ public class TripChartGenerator {
         renderer.setSeriesShapesVisible(0, true);
         renderer.setSeriesShapesFilled(0, true);
 
-        ChartUtils.saveChartAsPNG(new File("output/trip_duration_line_chart.png"), chart, 800, 600);
+        ChartUtils.saveChartAsPNG(new File("output/charts/trip_duration_line_chart.png"), chart, 800, 600);
     }
 }

@@ -20,6 +20,8 @@ package visualization;
 
 import service.SmartTravelService;
 import client.Client;
+import exceptions.InvalidAccommodationDataException;
+import persistence.ErrorLogger;
 import travel.Trip;
 
 import java.io.File;
@@ -46,9 +48,9 @@ public class DashboardGenerator {
         new File("output").mkdirs();
         
         // 1. Generate charts FIRST (your existing code)
-        TripChartGenerator.generateCostBarChart(service);
-        TripChartGenerator.generateDestinationPieChart(service);
-        TripChartGenerator.generateDurationLineChart(service);
+        TripChartGenerator.generateCostBarChart(service.getTrips(),service.getTripCount());
+        TripChartGenerator.generateDestinationPieChart(service.getTrips(),service.getTripCount());
+        TripChartGenerator.generateDurationLineChart(service.getTrips(),service.getTripCount());
         
         // 2. Generate HTML dashboard
         generateHTMLDashboard(service);
@@ -131,12 +133,12 @@ public class DashboardGenerator {
         out.println("                <tbody>");
         
         for (int i = 0; i < service.getClientCount(); i++) {
-            Client client = service.getClient(i);
-            double spent = client.getTotalSpent();
+            Client client = service.getClients()[i];
+            double spent = client.getTotalSpent(service.getTrips(),service.getTripCount());
             out.println("                    <tr>");
-            out.println("                        <td><strong>" + client.getClientId() + "</strong></td>");
+            out.println("                        <td><strong>" + client.getClientID() + "</strong></td>");
             out.println("                        <td>" + client.getFirstName() + " " + client.getLastName() + "</td>");
-            out.println("                        <td>" + client.getEmail() + "</td>");
+            out.println("                        <td>" + client.getEmailAddress() + "</td>");
             out.println("                        <td style='font-weight: bold; color: " + 
                     								(spent > 3000 ? "#d32f2f" : "#388e3c") + ";'>" + 
                     										String.format("%,.2f", spent) + "</td>");
@@ -165,12 +167,12 @@ public class DashboardGenerator {
         out.println("                <tbody>");
         
         for (int i = 0; i < service.getTripCount(); i++) {
-            Trip trip = service.getTrip(i);
+            Trip trip = service.getTrips()[i];
             out.println("                    <tr>");
             out.println("                        <td><strong>" + trip.getTripId() + "</strong></td>");
             out.println("                        <td>" + trip.getClientId() + "</td>");
             out.println("                        <td>" + trip.getDestination() + "</td>");
-            out.println("                        <td>" + trip.getDurationInDays() + "</td>");
+            out.println("                        <td>" + trip.getDuration() + "</td>");
             out.println("                        <td>$" + String.format("%.2f", service.calculateTripTotal(i)) + "</td>");
             out.println("                    </tr>");
         }
@@ -224,15 +226,34 @@ public class DashboardGenerator {
             return;
         }
     	
-        // 1. Total Revenue & Avg Cost
+        // 1. Total Revenue 
         double totalRevenue = 0.0;
+        Trip[] trips = service.getTrips();
+        for (int i=0;i<tripCount;i++){
+            try {
+                totalRevenue += trips[i].calculateTotalCost(trips[i].getDuration());  
+            } catch (InvalidAccommodationDataException ex) {
+                ErrorLogger.log(ex.getMessage());
+            }
+                     
+        }
+
+		// Avg cost
+        double avgCost = totalRevenue / service.getTripCount();
         
-		//ADD CODE
+        // 2. total Duration (days)
+        double totalDays = 0.0;
+        for (int i = 0; i < tripCount; i++) {
+            totalDays += trips[i].getDuration();
+        }
+        // Avg days
+        double avgDuration = totalDays / tripCount;
+
+        // most visisted + visit count
+        String mostVisited = findMostVisitedDestination(service);
+        int visitCount = countDestinationVisits(service, mostVisited);
         
-        // 2. Average Duration (days)
-        double totalDays = 0.0, avgDuration =0.0;
-        
-		//ADD CODE
+		
     	
         
         out.println("        <section class='stats-section'>");
@@ -296,16 +317,59 @@ public class DashboardGenerator {
      * Finds destination with most trips
      */
     private static String findMostVisitedDestination(SmartTravelService service) {
-        
-		//ADD CODE
+        Trip[] trips = service.getTrips();
+        int count = service.getTripCount();
+
+        // Arrays to store unique destinations and their counts
+        String[] destNames = new String[count]; // 2 arrays one to store every unique destination another one for how many times it comes up
+        int[] destCounts = new int[count]; 
+        int uniqueCount = 0; // how many unique location has this method found
+
+        for (int i=0;i<count;i++){
+            String tempDestination = trips[i].getDestination();
+            boolean found= false;
+
+            for (int q=0;q<uniqueCount;q++){
+
+                if (destNames[q].equalsIgnoreCase(tempDestination)){ // location not unique increment count for specific location
+                    destCounts[q]++;
+                    found =true;
+                    break;
+                }
+            }
+                if (!found){ // location unique add to array set count to 1 for specific location
+                    destNames[uniqueCount]=tempDestination;
+                    destCounts[uniqueCount]=1;
+                    uniqueCount++;
+                }
+            }
+                int maxIndex = 0; // calculating most visisted trip 
+                for (int i = 1; i < uniqueCount; i++) {
+                if (destCounts[i] > destCounts[maxIndex]) {
+                maxIndex = i;
+                }    	
+        }
+        return destNames[maxIndex];
     }
 
     /**
      * Counts trips to specific destination
      */
     private static int countDestinationVisits(SmartTravelService service, String destination) {
-        
-		//ADD CODE
+        if (destination == null || destination.isEmpty()) {
+        return 0;
+        }
+
+		Trip[] trips = service.getTrips();
+        int count = service.getTripCount();
+        int counter = 0;
+        for (int i =0;i<count;i++){
+            if (trips[i].getDestination().equalsIgnoreCase(destination)){
+                counter++;                
+            }
+            
+        }
+        return counter;
     }
 
     

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import persistence.*;
 import travel.*;
-import visualization.TripChartGenerator;
+import visualization.DashboardGenerator;
 import service.*;
 
 public class driver {
@@ -184,8 +184,13 @@ public class driver {
                 }
                 Client client = service.getClients()[choice3]; 
                 String cId = client.getClientID();
-                service.deleteClient(cId); 
-
+                try {
+                    service.deleteClient(cId); 
+                } catch (EntityNotFoundException ex) {
+                    System.out.println("Error: "+ex.getMessage());
+                    ErrorLogger.log(ex.getMessage());
+                
+                }
                 break;
 
             case 4:
@@ -509,7 +514,14 @@ public class driver {
                     System.out.println("Invalid index");
                 }
                 Trip trip = service.getTrips()[index];
-                service.deleteTrip(trip);
+                String tripIdToRemove = trip.getTripId();
+                try {
+                    service.deleteTrip(tripIdToRemove);
+                } catch (EntityNotFoundException ex) {
+                    System.out.println("Error:"+ex.getMessage());
+                    ErrorLogger.log(ex.getMessage());
+                }
+                
                 break;
 
             case 4:
@@ -637,12 +649,10 @@ public class driver {
                         System.out.println("Enter train cost:");
                         double cost = in.nextDouble();
                         in.nextLine();
-                        try {
-                            transport = new Train(company, depart, arrive, trainType, seatclass, cost);
-                            service.addTransportation(transport);
-                        } catch (InvalidTransportDataException ex) {
-                            System.out.println("Error: "+ex.getMessage());
-                        }
+                        
+                        transport = new Train(company, depart, arrive, trainType, seatclass, cost);
+                        service.addTransportation(transport);
+                        
                         break;
 
                     case 3:
@@ -887,7 +897,7 @@ public class driver {
                 // removing tranportation option from specified trip
                 try {
                     service.removeAccommodation(accommId);
-                    // If we reach here, removal succeeded
+                    
                     tripRemoveAcc.setAccommadation(null); // remove from trip
                     System.out.println("Accommodation removed from trip successfully!");
                 } catch (EntityNotFoundException ex) {
@@ -897,7 +907,7 @@ public class driver {
                 break;
         case 3:
              // Listing options
-             if (accommadationCount == 0) {
+             if (service.getAccommodationCount() == 0) {
                 System.out.println("No accommadation options available.");
                 break;
                 }
@@ -914,10 +924,11 @@ public class driver {
                 System.out.println("Invalid selection.");
                 break;
                 }
+                int accommadationCount = service.getAccommodationCount();
 
 
                 for (int i =0; i < accommadationCount ;i++){
-                    Accommadation temp = accommadations[i];
+                    Accommadation temp = service.getAccommodations()[i];
                     switch (typeChoice) {
                         case 1:
                             // searching for hotels
@@ -964,39 +975,38 @@ public class driver {
 
         switch (choice) {
             case 1:
-                // show most expensive trip
-                if(tripCount == 0){
+                /// Show most expensive trip
+                if (service.getTripCount() == 0) {
                     System.out.println("No trips available.");
                     break;
                 }
-                Trip expensiveTrip = trips[0];
-                double highestCost =0;
-                try {
-                    highestCost = expensiveTrip.calculateTotalCost(expensiveTrip.getDuration());
-                } catch (InvalidAccommodationDataException ex) {
-                    System.out.println("Error: "+ex.getMessage());
-                }
-                
 
-                for (int i =0; i < tripCount;i++){
+                Trip[] trips = service.getTrips();
+                Trip mostExpensive = null;
+                double highestCost = 0;
+
+                for (int i = 0; i < service.getTripCount(); i++) {
                     try {
-                        double tempCost = trips[i].calculateTotalCost(trips[i].getDuration());
-                        if (tempCost > highestCost){
-                            highestCost =tempCost;
-                            expensiveTrip = trips[i];
-                    }
+                        double cost = trips[i].calculateTotalCost(trips[i].getDuration());
+                        if (cost > highestCost) {
+                            highestCost = cost;
+                            mostExpensive = trips[i];
+                        }
                     } catch (InvalidAccommodationDataException ex) {
-                        System.out.println("Error: "+ex.getMessage());
-
+                        // Log or print a warning; optionally collect errors
+                        System.out.println("Warning: Could not calculate cost for trip " + i + " - " + ex.getMessage());
                     }
-                    
                 }
-                System.out.println("Most expensive trip: \n" + expensiveTrip.toString());
-                System.out.println("With a cost of: " + highestCost);                
-                break;
+
+                if (mostExpensive == null) {
+                    System.out.println("No trips could be evaluated (all calculations failed).");
+                } else {
+                    System.out.println("Most expensive trip:\n" + mostExpensive);
+                    System.out.println("With a cost of: " + highestCost);
+                }
             case 2:
                 // calculate cost of selected trip
-                if(tripCount == 0){
+                if(service.getTripCount() == 0){
                     System.out.println("No trips available.");
                     break;
                 }
@@ -1004,10 +1014,10 @@ public class driver {
                 listTrips();
                 int indexChoice = in.nextInt();
                 in.nextLine();
-                if (indexChoice < 0 || indexChoice >= tripCount){
+                if (indexChoice < 0 || indexChoice >= service.getTripCount()){
                     System.out.println("Invalid choice");break;
                 }
-                Trip temp = trips[indexChoice];
+                Trip temp = service.getTrips()[indexChoice];
                 try {
                     System.out.println(temp.calculateTotalCost(temp.getDuration()));
                 } catch (InvalidAccommodationDataException ex) {
@@ -1017,16 +1027,18 @@ public class driver {
                 break;
             case 3:
                 // copy transportation array
-                Transportation[] copyTransportations = new Transportation[transportCount];
-                for (int i =0;i<transportCount;i++){
-                    if (transportations[i] instanceof Flight){
-                        Flight flightTemp = (Flight) transportations[i];
+                int countTransport = service.getTransportCount();
+                Transportation[] copyTransportations = new Transportation[countTransport];
+                Transportation[] copyFromTransport = service.getTransportations();
+                for (int i =0;i<service.getTransportCount();i++){
+                    if (copyFromTransport[i] instanceof Flight){
+                        Flight flightTemp = (Flight) copyFromTransport[i];
                         copyTransportations[i] = new Flight(flightTemp);
-                    } else if (transportations[i] instanceof Train){
-                        Train trainTemp = (Train) transportations[i];
+                    } else if (copyFromTransport[i] instanceof Train){
+                        Train trainTemp = (Train) copyFromTransport[i];
                         copyTransportations[i] = new Train(trainTemp);
-                    }else if (transportations[i] instanceof Bus){
-                        Bus busTemp = (Bus) transportations[i];
+                    }else if (copyFromTransport[i] instanceof Bus){
+                        Bus busTemp = (Bus) copyFromTransport[i];
                         copyTransportations[i] = new Bus(busTemp);
                     }
 
@@ -1035,13 +1047,15 @@ public class driver {
                 break;
             case 4:
                 // deep copy accommadations array
-                Accommadation[] copyAccommadations = new Accommadation[accommadationCount];
-                for (int i=0;i<accommadationCount;i++){
-                    if (accommadations[i] instanceof Hotel){
-                        Hotel hotelTemp = (Hotel) accommadations[i];
+                int countAccomm = service.getAccommodationCount();
+                Accommadation[] copyAccommadations = new Accommadation[countAccomm];
+                Accommadation[] copyFromAccommadations = service.getAccommodations();
+                for (int i=0;i<service.getAccommodationCount();i++){
+                    if (copyFromAccommadations[i] instanceof Hotel){
+                        Hotel hotelTemp = (Hotel) copyFromAccommadations[i];
                         copyAccommadations[i] = new Hotel(hotelTemp);
-                    } else if (accommadations[i] instanceof Hostel){
-                        Hostel hostelTemp = (Hostel) accommadations[i];
+                    } else if (copyFromAccommadations[i] instanceof Hostel){
+                        Hostel hostelTemp = (Hostel) copyFromAccommadations[i];
                         copyAccommadations[i] = new Hostel(hostelTemp);
                     }
                 }
@@ -1135,31 +1149,22 @@ public class driver {
   }
 
     //----------------------------------
-    // Chart generation
+    //  generation charts and HTML
     //----------------------------------
 
 
         private static void generateDashboard() {
-            if (tripCount == 0) {
+            if (service.getTripCount() == 0) {
                 System.out.println("No trips available to generate charts.");
                 return;
             }
-
-            try {
-                TripChartGenerator.generateCostBarChart(trips, tripCount);
-                System.out.println("Cost bar chart saved to output/trip_cost_bar_chart.png");
-
-                TripChartGenerator.generateDestinationPieChart(trips, tripCount);
-                System.out.println("Destination pie chart saved to output/trips_per_destination_pie.png");
-
-                TripChartGenerator.generateDurationLineChart(trips, tripCount);
-                System.out.println("Duration line chart saved to output/trip_duration_line_chart.png");
-
-                System.out.println("All charts generated successfully.");
-            } catch (IOException e) {
-                System.out.println("Error saving charts: " + e.getMessage());
-                ErrorLogger.log("Chart generation error: " + e.getMessage());
-            }
+                try {
+                    DashboardGenerator.generateDashboard(service);
+                    System.out.println("Dashboard generated successfully!");
+                } catch (IOException e) {
+                    System.out.println("Error generating dashboard: " + e.getMessage());
+                    ErrorLogger.log("Dashboard generation error: " + e.getMessage());
+                }
         }
 
   

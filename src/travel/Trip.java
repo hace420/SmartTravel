@@ -233,6 +233,14 @@ public boolean equals(Object obj) {
     public static void updateNextId(int id){
             nextId = id;
         }
+  // used for dashboard
+        public String getClientId(){
+          if (client != null){
+            return client.getClientID();
+          } else {
+            return "No Client can be found linked to this trip";
+          }
+        }
 
 
 }

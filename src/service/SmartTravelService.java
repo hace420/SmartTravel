@@ -31,6 +31,28 @@ public class SmartTravelService {
                 throw ex;
             }
     }
+    public void deleteClient(String id)throws EntityNotFoundException{
+        int indexToRemove = -1;
+            for (int i=0;i<clientCount;i++){
+                if (clients[i].getClientID().equalsIgnoreCase(id)){
+                    indexToRemove =i;
+                    break;
+                }
+            }
+        if (indexToRemove == -1) {
+            EntityNotFoundException ex = new EntityNotFoundException("Client not found with ID: " + id);
+            ErrorLogger.log(ex.getMessage());
+            throw ex;
+        }
+         // Shift elements left
+        for (int i = indexToRemove; i < clientCount - 1; i++) {
+            clients[i] = clients[i + 1];
+        }
+        clients[clientCount - 1] = null;
+        clientCount--;
+       
+
+    }
        // ---------- Transportation operations ----------
     public void addTransportation(Transportation t) {
         
@@ -127,6 +149,48 @@ public class SmartTravelService {
         ErrorLogger.log("Invalid trip data: " + ex.getMessage());
         throw ex;
     }
+    }
+
+    public void deleteTrip(String tripId) throws EntityNotFoundException {
+        int index = -1;
+        for (int i = 0; i < tripCount; i++) {
+            if (trips[i].getTripId().equals(tripId)) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1) {
+            EntityNotFoundException ex = new EntityNotFoundException("Trip not found with ID: " + tripId);
+            ErrorLogger.log(ex.getMessage());
+            throw ex;
+        }
+
+        // Remove associated transportation 
+        Transportation transport = trips[index].getTransportation();
+        if (transport != null) {
+            try {
+                removeTransportation(transport.getTripId());
+            } catch (EntityNotFoundException ex) {
+                ErrorLogger.log("Error: Associated transport not found while deleting trip: " + ex.getMessage());
+            }
+        }
+
+        // Remove associated accommodation 
+        Accommadation accommodation = trips[index].getAccommadation();
+        if (accommodation != null) {
+            try {
+                removeAccommodation(accommodation.getAccommId());
+            } catch (EntityNotFoundException ex) {
+                ErrorLogger.log("Error: Associated accommodation not found while deleting trip: " + ex.getMessage());
+            }
+        }
+
+        // Shift trip array elements left
+        for (int i = index; i < tripCount - 1; i++) {
+            trips[i] = trips[i + 1];
+        }
+        trips[tripCount - 1] = null;
+        tripCount--;
     }
 
     
@@ -230,6 +294,19 @@ public class SmartTravelService {
            
             
         }
+    }
+    // used for dashboard 
+    public double calculateTripTotal(int index) {
+    if (index < 0 || index >= tripCount) {
+        ErrorLogger.log("Invalid trip index: " + index);
+        return 0.0;
+    }
+    try {
+        return trips[index].calculateTotalCost(trips[index].getDuration());
+    } catch (InvalidAccommodationDataException ex) {
+        ErrorLogger.log("Error calculating trip total for index " + index + ": " + ex.getMessage());
+        return 0.0;
+    }
     }
     // ---------- Getters ----------
     public Client[] getClients() { return clients; }
