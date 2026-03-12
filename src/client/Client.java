@@ -1,5 +1,8 @@
 package client;
 import exceptions.InvalidClientDataException;
+import persistence.ErrorLogger;
+import travel.Trip;
+import exceptions.InvalidAccommodationDataException;
 
 public class Client {
   private static int nextid = 1001;
@@ -136,5 +139,20 @@ public class Client {
   public static void updateNextID(int next) {
     nextid = next;
 }
+// used for dahsboard creation
+    public double getTotalSpent(Trip[] allTrips, int tripCount) {
+            double total = 0.0;
+            for (int i = 0; i < tripCount; i++) {
+                Trip trip = allTrips[i];
+                if (trip.getClient().equals(this)) {   // requires proper equals() in Client
+                    try {
+                        total += trip.calculateTotalCost(trip.getDuration());
+                    } catch (InvalidAccommodationDataException ex) {
+                       ErrorLogger.log(ex.getMessage());
+                    }
+                }
+            }
+            return total;
+        }
 
 }

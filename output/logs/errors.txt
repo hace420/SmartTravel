@@ -1,3 +1,4 @@
 Error invalid first name Invalid first name
 Invalid trip ID format: T2
 Invalid client line: 
+Dashboard generation error: output/charts/trip_cost_bar_chart.png (No such file or directory)
