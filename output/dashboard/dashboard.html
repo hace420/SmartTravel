@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>SmartTravel A2 Dashboard</title>
+    <link rel='stylesheet' href='styles.css'>
+</head>
+<body>
+    <div class='container'>
+        <header>
+            <h1>SmartTravel Dashboard</h1>
+            <p>A2: File I/O + Exceptions | 4 Clients | 8 Trips</p>
+        </header>
+        <section class='data-section'>
+            <h2> Clients (4)</h2>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Total Spent ($)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>C1001</strong></td>
+                        <td>robert cline</td>
+                        <td>robert@gmail.com</td>
+                        <td style='font-weight: bold; color: #d32f2f;'>6,500.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>C1002</strong></td>
+                        <td>chris smith</td>
+                        <td>chrissss@hotmail.com</td>
+                        <td style='font-weight: bold; color: #d32f2f;'>20,000.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>C1003</strong></td>
+                        <td>bob hank</td>
+                        <td>hank@gmail.com</td>
+                        <td style='font-weight: bold; color: #d32f2f;'>13,565.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>C1004</strong></td>
+                        <td>testing logging</td>
+                        <td>hope@this.works</td>
+                        <td style='font-weight: bold; color: #d32f2f;'>61,390.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section class='data-section'>
+            <h2> Trips (8)</h2>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Client</th><th>Destination</th><th>Days</th><th>Price</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>T2001</strong></td>
+                        <td>C1002</td>
+                        <td>paris</td>
+                        <td>10</td>
+                        <td>$12500.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2002</strong></td>
+                        <td>C1001</td>
+                        <td>montreal</td>
+                        <td>15</td>
+                        <td>$6500.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2003</strong></td>
+                        <td>C1003</td>
+                        <td>van</td>
+                        <td>4</td>
+                        <td>$1665.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2004</strong></td>
+                        <td>C1002</td>
+                        <td>paris</td>
+                        <td>10</td>
+                        <td>$7500.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2005</strong></td>
+                        <td>C1003</td>
+                        <td>paris</td>
+                        <td>14</td>
+                        <td>$11900.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2006</strong></td>
+                        <td>C1004</td>
+                        <td>paris</td>
+                        <td>20</td>
+                        <td>$10000.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2007</strong></td>
+                        <td>C1004</td>
+                        <td>montreal</td>
+                        <td>20</td>
+                        <td>$20090.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>T2008</strong></td>
+                        <td>C1004</td>
+                        <td>montreal</td>
+                        <td>20</td>
+                        <td>$31300.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section class='charts-section'>
+            <h2>Analytics (JFreeChart)</h2>
+            <div class='chart-grid'>
+                <figure class='chart-card'>
+                    <img src='../charts/trip_cost_bar_chart.png' alt='Trip Costs' loading='lazy'>
+                    <figcaption>Total Cost per Trip</figcaption>
+                </figure>
+                <figure class='chart-card'>
+                    <img src='../charts/trips_per_destination_pie.png' alt='Destinations' loading='lazy'>
+                    <figcaption>Trips per Destination</figcaption>
+                </figure>
+                <figure class='chart-card'>
+                    <img src='../charts/trip_duration_line_chart.png' alt='Durations' loading='lazy'>
+                    <figcaption>Trip Durations</figcaption>
+                </figure>
+            </div>
+        </section>
+        <section class='stats-section'>
+            <h2>Quick Stats (8 Trips)</h2>
+            <div class='stat-grid'>
+                <div class='stat-item'>
+                    <span class='stat-label'>Avg Trip Cost</span>
+                    <span class='stat-value'>$12,682</span>
+                </div>
+                <div class='stat-item'>
+                    <span class='stat-label'>Avg Duration</span>
+                    <span class='stat-value'>14.1 days</span>
+                </div>
+                <div class='stat-item'>
+                    <span class='stat-label'>Total Revenue</span>
+                    <span class='stat-value'>$101,455</span>
+                </div>
+                <div class='stat-item'>
+                    <span class='stat-label'>Most Visited</span>
+                    <span class='stat-value'>paris<br><small>(4 trips)</small></span>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

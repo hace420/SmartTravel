@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package travel;
 import client.Client;
 import exceptions.*;
@@ -39,6 +44,20 @@ public class Trip {
     this.transportation =transportation;
     this.tripId = "T" + nextId;
     nextId++;
+  }
+  public Trip(String tripId,String destination, int duration, double basePrice, Client client,Transportation transportation, Accommadation accommadation) throws InvalidTripDataException{
+    if (basePrice < 100.00) throw new InvalidTripDataException("Base price must be greater than or equal to 100.00$");
+    if (duration < 1 || duration > 20) throw new InvalidTripDataException("Duration must be between 1-20 days");
+    if (client == null) throw new InvalidTripDataException("Client does not exist in system");
+
+    this.destination = destination;
+    this.duration = duration;
+    this.basePrice = basePrice;
+    this.client = client;
+    this.accommadation =accommadation;
+    this.transportation =transportation;
+    this.tripId = tripId;
+    
   }
 
   public Trip(Trip other){
@@ -88,6 +107,9 @@ public class Trip {
   public Accommadation getAccommadation(){
     return accommadation;
   }
+  public double getBasePrice(){
+    return basePrice;
+  }
 
 
   // setters
@@ -114,6 +136,7 @@ public class Trip {
   public void setAccommadation(Accommadation accommadation){
     this.accommadation = accommadation;
   }
+  
 
  @Override
 public String toString() {
@@ -212,6 +235,17 @@ public boolean equals(Object obj) {
 
     return true;
 }
+    public static void updateNextId(int id){
+            nextId = id;
+        }
+  // used for dashboard
+        public String getClientId(){
+          if (client != null){
+            return client.getClientID();
+          } else {
+            return "No Client can be found linked to this trip";
+          }
+        }
 
 
 }

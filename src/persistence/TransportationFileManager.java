@@ -1,18 +1,24 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package persistence;
 
-import travel.*;
-import exceptions.InvalidTransportDataException;
+import exceptions.*;
 import java.io.*;
 import java.util.Scanner;
+import travel.*;
 
 public class TransportationFileManager {
-
     private static final String TRANSPORT_FILE = "output/data/transportations.csv";
 
     public static void saveTransportations(Transportation[] transports, int transportCount) throws IOException {
         try (PrintWriter pw = new PrintWriter(new FileWriter(TRANSPORT_FILE))) {
             for (int i = 0; i < transportCount; i++) {
                 Transportation t = transports[i];
+                if (t == null) continue;
+
                 if (t instanceof Bus) {
                     Bus b = (Bus) t;
                     pw.println("BUS;" + b.getTripId() + ";" + b.getCompanyName() + ";" +
@@ -45,7 +51,12 @@ public class TransportationFileManager {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine().trim();
                 if (line.isEmpty()) continue;
+
                 String[] tokens = line.split(";");
+                if (tokens.length < 5) {
+                    ErrorLogger.log("Invalid transport line (too few fields): " + line);
+                    continue;
+                }
 
                 String type = tokens[0];
                 String id = tokens[1];
@@ -56,37 +67,58 @@ public class TransportationFileManager {
                 try {
                     Transportation t = null;
                     switch (type) {
-                        case "Bus":
+                        case "BUS":
                             if (tokens.length != 8) {
                                 ErrorLogger.log("Invalid Bus line (expected 8 fields): " + line);
                                 continue;
                             }
                             String busCompany = tokens[5];
-                            int stops = Integer.parseInt(tokens[6]);
-                            double busCost = Double.parseDouble(tokens[7]);
+                            int stops;
+                            double busCost;
+                            try {
+                                stops = Integer.parseInt(tokens[6]);
+                                busCost = Double.parseDouble(tokens[7]);
+                            } catch (NumberFormatException e) {
+                                ErrorLogger.log("Invalid numeric data for BUS: " + line);
+                                continue;
+                            }
                             t = new Bus(id, company, depart, arrive, busCompany, stops, busCost);
                             break;
 
-                        case "Flight":
+                        case "FLIGHT":
                             if (tokens.length != 9) {
                                 ErrorLogger.log("Invalid Flight line (expected 9 fields): " + line);
                                 continue;
                             }
                             String airline = tokens[5];
-                            double luggageAllow = Double.parseDouble(tokens[6]);
-                            double ticket = Double.parseDouble(tokens[7]);
-                            double luggageCost = Double.parseDouble(tokens[8]);
+                            double luggageAllow, ticket, luggageCost;
+                            try {
+                                luggageAllow = Double.parseDouble(tokens[6]);
+                                ticket = Double.parseDouble(tokens[7]);
+                                luggageCost = Double.parseDouble(tokens[8]);
+                            } catch (NumberFormatException e) {
+                                ErrorLogger.log("Invalid numeric data for FLIGHT: " + line);
+                                continue;
+                            }
                             t = new Flight(id, company, depart, arrive, airline, luggageAllow, ticket, luggageCost);
                             break;
 
-                        case "Train":
+                        case "TRAIN":
                             if (tokens.length != 8) {
                                 ErrorLogger.log("Invalid Train line (expected 8 fields): " + line);
                                 continue;
                             }
-                            TrainType trainType = TrainType.valueOf(tokens[5]);
-                            SeatClass seatClass = SeatClass.valueOf(tokens[6]);
-                            double trainCost = Double.parseDouble(tokens[7]);
+                            TrainType trainType;
+                            SeatClass seatClass;
+                            double trainCost;
+                            try {
+                                trainType = TrainType.valueOf(tokens[5]);
+                                seatClass = SeatClass.valueOf(tokens[6]);
+                                trainCost = Double.parseDouble(tokens[7]);
+                            } catch (IllegalArgumentException e) {
+                                ErrorLogger.log("Invalid enum or numeric data for TRAIN: " + line);
+                                continue;
+                            }
                             t = new Train(id, company, depart, arrive, trainType, seatClass, trainCost);
                             break;
 
@@ -101,13 +133,14 @@ public class TransportationFileManager {
                     }
                     transports[count++] = t;
 
-                    // Extract numeric part from ID (assuming format "TR" + digits)
-                    int numId = Integer.parseInt(id.substring(2));
-                    if (numId > maxId) maxId = numId;
-
+                    
+                    
+                        int numId = Integer.parseInt(id.substring(2));
+                        if (numId > maxId) maxId = numId;
+                    
                 } catch (InvalidTransportDataException ex) {
-                    ErrorLogger.log("Invalid transport data: " + ex.getMessage());
-                } 
+                    ErrorLogger.log("Invalid transport data: " + ex.getMessage() + " | Line: " + line);
+                }
             }
         }
 

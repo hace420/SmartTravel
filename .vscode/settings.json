@@ -1,3 +1,8 @@
 {
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable"
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable",
+    "java.project.referencedLibraries": [
+        "lib/jcommon-1.0.24.jar",
+        "lib/jfreechart-1.5.6.jar"
+    ],
+    "java.format.settings.url": ".vscode/java-formatter.xml"
 }
