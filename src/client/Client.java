@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package client;
 import exceptions.InvalidClientDataException;
 import persistence.ErrorLogger;
@@ -144,7 +149,7 @@ public class Client {
             double total = 0.0;
             for (int i = 0; i < tripCount; i++) {
                 Trip trip = allTrips[i];
-                if (trip.getClient().equals(this)) {   // requires proper equals() in Client
+                if (trip.getClient().equals(this)) {   
                     try {
                         total += trip.calculateTotalCost(trip.getDuration());
                     } catch (InvalidAccommodationDataException ex) {

@@ -1,4 +1,28 @@
+================================================================================================================================
+BATCH LOAD ERRORS
+Source: output/data/
+Time:   // not implemented
+Count:  // not implemented
+
 Error invalid first name Invalid first name
 Invalid trip ID format: T2
 Invalid client line: 
 Dashboard generation error: output/charts/trip_cost_bar_chart.png (No such file or directory)
+Invalid first name
+Invalid first name
+Unknown transport type: k
+Transport not found for trip: T2004 – proceeding without transport.
+Invalid email format
+Invalid email format
+Invalid email format
+Invalid email format
+Invalid email format
+Invalid first name
+Error: Price per night for Hostel is at the most 150$
+Error: Price per night for Hostel is at the most 150$
+Error: NUmber of stops must be equal to or greater than 1
+Error: Price per night for Hostel is at the most 150$
+Error: Price per night for Hostel is at the most 150$
+Invalid trip data: Duration must be between 1-20 days
+Error: Duration must be between 1-20 days
+Invalid trip data: Duration must be between 1-20 days

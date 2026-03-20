@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package service;
 import client.Client;
 import exceptions.*;
@@ -6,8 +11,8 @@ import travel.*;
 import java.io.IOException;
 
 public class SmartTravelService {
-    private  Client[] clients = new Client[50];       // initializing arrays for storing information
-    private  Trip[] trips = new Trip[50];
+    private  Client[] clients = new Client[100];       // initializing arrays for storing information
+    private  Trip[] trips = new Trip[200];
     private  Transportation[] transportations = new Transportation[50];
     private  Accommadation[] accommadations = new Accommadation[50];
 
@@ -16,6 +21,8 @@ public class SmartTravelService {
     private  int transportCount = 0;
     private  int accommadationCount = 0;
 
+
+    // ---- client methods ----
     public void addClient(String name,String lastname,String email)throws InvalidClientDataException, DuplicateEmailException{
         if (duplicateEmailCheck(email)) {
             DuplicateEmailException ex = new DuplicateEmailException("Error: Email already registered to a client.");
@@ -119,36 +126,34 @@ public class SmartTravelService {
         accommadations[accommadationCount - 1] = null;
         accommadationCount--;
     }
-    // trip methods
+    //---- trip methods ---------
     public void createTrip(String destination, int duration, double basePrice,
                        String clientId, String transportId, String accommodationId)
-        throws InvalidTripDataException, EntityNotFoundException {
-    
-    
+        throws InvalidTripDataException, EntityNotFoundException {  
 
-    
-    Client client = findClientById(clientId);
+            
+            Client client = findClientById(clientId);
 
-    
-    Transportation transport = null;
-    if (transportId != null && !transportId.isEmpty() && !"null".equals(transportId)) {
-        transport = findTransportById(transportId);
-    }
+            
+            Transportation transport = null;
+            if (transportId != null && !transportId.isEmpty() && !"null".equals(transportId)) {
+                transport = findTransportById(transportId);
+            }
 
-   
-    Accommadation accommodation = null;
-    if (accommodationId != null && !accommodationId.isEmpty() && !"null".equals(accommodationId)) {
-        accommodation = findAccommodationById(accommodationId);
-    }
+        
+            Accommadation accommodation = null;
+            if (accommodationId != null && !accommodationId.isEmpty() && !"null".equals(accommodationId)) {
+                accommodation = findAccommodationById(accommodationId);
+            }
 
-    // Create and store the trip
-    try {
-        Trip trip = new Trip(destination, duration, basePrice, client, transport, accommodation);
-        trips[tripCount++] = trip;
-    } catch (InvalidTripDataException ex) {
-        ErrorLogger.log("Invalid trip data: " + ex.getMessage());
-        throw ex;
-    }
+            // Create and store the trip
+            try {
+                Trip trip = new Trip(destination, duration, basePrice, client, transport, accommodation);
+                trips[tripCount++] = trip;
+            } catch (InvalidTripDataException ex) {
+                ErrorLogger.log("Invalid trip data: " + ex.getMessage());
+                throw ex;
+            }
     }
 
     public void deleteTrip(String tripId) throws EntityNotFoundException {
@@ -247,21 +252,17 @@ public class SmartTravelService {
 
     try {
         // Load clients 
-        clientCount = ClientFileManager.loadClients(clients);
-       
-
+        clientCount = ClientFileManager.loadClients(clients);     
         //  Load accommodations 
         accommadationCount = AccommodationFileManager.loadAccommodations(accommadations, 0);
-        
-
         //  Load transports 
         transportCount = TransportationFileManager.loadTransportations(transportations);
-       
-
         //  Load trips 
         tripCount = TripFileManager.loadTrips(trips, clients, clientCount,
                                               transportations, transportCount,
                                               accommadations, accommadationCount);
+
+        System.out.println("Data loaded succesfully!");
        
 
        
@@ -289,7 +290,7 @@ public class SmartTravelService {
                                     accommadations, accommadationCount);
            
 
-           
+            System.out.println("Data saved succesfully!");
             } catch (IOException ex) {
            
             

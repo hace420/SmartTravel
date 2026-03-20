@@ -1,3 +1,7 @@
 FLIGHT;TR3001;air;montreal;parios;air;100.0;300.0;100.0
 TRAIN;TR3002;rail;toronto;montreal;HIGH_SPEED;FIRST_CLASS;100.0
 TRAIN;TR3003;trainco;england;paris;HIGH_SPEED;FIRST_CLASS;200.0
+FLIGHT;TR3004;flightCo;london;paris;flightCo;25.0;400.0;100.0
+BUS;TR3005;company;toronto;montreal;company;70;90.0
+FLIGHT;TR3006;company;london;montreal;company;100.0;500.0;300.0
+BUS;TR3007;cois;lao;paris;coka;99;119.0

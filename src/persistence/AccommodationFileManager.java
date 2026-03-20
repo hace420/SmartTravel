@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package persistence;
 
 import exceptions.InvalidAccommodationDataException;

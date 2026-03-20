@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package travel;
 import exceptions.*;
 
@@ -58,7 +63,7 @@ public class Hostel extends Accommadation {
 
     @Override
     public String toString(){
-        return "HOSTEL\n"+
+        return "HOSTEL"+
         super.toString() + 
         "\nNumber of beds: " + numberOfBeds +
         "\nFees: " + fees;

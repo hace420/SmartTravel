@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment (2)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package travel;
 
 import exceptions.InvalidAccommodationDataException;
@@ -55,7 +60,7 @@ public class Hotel extends Accommadation{
 
     @Override
     public String toString(){
-        return  "HOTEL\n"+
+        return  "HOTEL"+
                 super.toString() +
                 "\nNumber of stars(1-5): " + numberOfStars +
                 "\nService fees: " + serviceFees;
