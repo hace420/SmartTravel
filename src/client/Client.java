@@ -5,16 +5,18 @@
 //------------------------------------------
 package client;
 import exceptions.InvalidClientDataException;
+import interfaces.*;
 import persistence.ErrorLogger;
 import travel.Trip;
 import exceptions.InvalidAccommodationDataException;
 
-public class Client {
+public class Client implements Identifiable, CsvPersistable, Comparable<Client>{
   private static int nextid = 1001;
   final private String clientID;
   private String firstName;
   private String lastName;
   private String emailAddress;
+  private double totalSpent;
 
   // constructors
   public Client() {
@@ -94,7 +96,8 @@ public class Client {
   }
 
   // getters
-  public String getClientID(){
+  @Override
+  public String getId(){
     return clientID;
   }
 
@@ -140,6 +143,36 @@ public class Client {
       return false;
     }
   }
+  public String toCsvRow(){
+    return (clientID+";"+firstName+";"+lastName+";"+emailAddress);
+  }
+  public static Client fromCsvRow(String csvLine) throws InvalidClientDataException{
+    String[] tokens = csvLine.split(";");
+    if (tokens.length != 4){
+      throw new InvalidClientDataException("Invalid CSV format for client"+csvLine);
+      
+    }
+    String id =tokens[0];
+    String firstName = tokens[1];
+    String lastName = tokens[2];
+    String email = tokens[3];
+    return new Client(id,firstName,lastName,email);
+
+  }
+
+  public double getTotalSpent(){
+    return totalSpent;
+  }
+  public void setTotalSpent(double s){
+    totalSpent =s;
+  }
+
+  // comparable 
+
+  public int compareTo(Client other){
+    return Double.compare(other.totalSpent, this.totalSpent);
+  }
+
   // used for file loading to preserve count of id 
   public static void updateNextID(int next) {
     nextid = next;

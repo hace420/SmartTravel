@@ -9,17 +9,16 @@ import exceptions.*;
 import persistence.*;
 import travel.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SmartTravelService {
-    private  Client[] clients = new Client[100];       // initializing arrays for storing information
-    private  Trip[] trips = new Trip[200];
-    private  Transportation[] transportations = new Transportation[50];
-    private  Accommadation[] accommadations = new Accommadation[50];
+    private  List<Client> clients = new ArrayList<>();      // initializing arrays for storing information
+    private  List<Trip> trips = new ArrayList<>(); 
+    private  List<Transportation> transportations = new ArrayList<>(); 
+    private  List<Accommadation> accommadations = new ArrayList<>(); 
 
-    private  int clientCount = 0;                  // used to track if space is available in array 
-    private  int tripCount = 0;
-    private  int transportCount = 0;
-    private  int accommadationCount = 0;
+    
 
 
     // ---- client methods ----
@@ -32,7 +31,7 @@ public class SmartTravelService {
             
             try {
                 Client c = new Client(name,lastname,email);
-                clients[clientCount++]=c;
+                clients.add(c);
             } catch (InvalidClientDataException ex) {
                 ErrorLogger.log(ex.getMessage());
                 throw ex;
@@ -40,9 +39,10 @@ public class SmartTravelService {
     }
     public void deleteClient(String id)throws EntityNotFoundException{
         int indexToRemove = -1;
-            for (int i=0;i<clientCount;i++){
-                if (clients[i].getClientID().equalsIgnoreCase(id)){
-                    indexToRemove =i;
+            for (int i=0;i<clients.size();i++){
+                if (clients.get(i).getClientID().equalsIgnoreCase(id)){
+                    clients.remove(i);
+                    indexToRemove = i;
                     break;
                 }
             }
@@ -51,25 +51,20 @@ public class SmartTravelService {
             ErrorLogger.log(ex.getMessage());
             throw ex;
         }
-         // Shift elements left
-        for (int i = indexToRemove; i < clientCount - 1; i++) {
-            clients[i] = clients[i + 1];
-        }
-        clients[clientCount - 1] = null;
-        clientCount--;
+       
        
 
     }
        // ---------- Transportation operations ----------
     public void addTransportation(Transportation t) {
         
-        transportations[transportCount++] = t;
+        transportations.add(t);
     }
 
     public Transportation findTransportById(String id) throws EntityNotFoundException {
-        for (int i = 0; i < transportCount; i++) {
-            if (transportations[i].getTripId().equals(id)) {
-                return transportations[i];
+        for (int i = 0; i < transportations.size(); i++) {
+            if (transportations.get(i).getTripId().equals(id)) {
+                return transportations.get(i);
             }
         }
         EntityNotFoundException e = new EntityNotFoundException("Transport not found with ID: " + id);
@@ -79,8 +74,9 @@ public class SmartTravelService {
 
     public void removeTransportation(String id) throws EntityNotFoundException {
         int index = -1;
-        for (int i = 0; i < transportCount; i++) {
-            if (transportations[i].getTripId().equals(id)) {
+        for (int i = 0; i < transportations.size(); i++) {
+            if (transportations.get(i).getTripId().equals(id)) {
+                transportations.remove(i);
                 index = i;
                 break;
             }
@@ -90,26 +86,22 @@ public class SmartTravelService {
             ErrorLogger.log(e.getMessage());
             throw e;
         }
-        // Shift elements left
-        for (int i = index; i < transportCount - 1; i++) {
-            transportations[i] = transportations[i + 1];
-        }
-        transportations[transportCount - 1] = null;
-        transportCount--;
+        
     }
 
     // ---------- Accommodation operations ----------
     public void addAccommodation(Accommadation a) {
         
-        accommadations[accommadationCount++] = a;
+        accommadations.add(a);
     }
 
     
 
     public void removeAccommodation(String id) throws EntityNotFoundException {
         int index = -1;
-        for (int i = 0; i < accommadationCount; i++) {
-            if (accommadations[i].getAccommId().equals(id)) {
+        for (int i = 0; i < accommadations.size(); i++) {
+            if (accommadations.get(i).getAccommId().equals(id)) {
+                accommadations.remove(i);
                 index = i;
                 break;
             }
@@ -119,12 +111,7 @@ public class SmartTravelService {
             ErrorLogger.log(e.getMessage());
             throw e;
         }
-        // Shift elements left
-        for (int i = index; i < accommadationCount - 1; i++) {
-            accommadations[i] = accommadations[i + 1];
-        }
-        accommadations[accommadationCount - 1] = null;
-        accommadationCount--;
+        
     }
     //---- trip methods ---------
     public void createTrip(String destination, int duration, double basePrice,
@@ -149,7 +136,7 @@ public class SmartTravelService {
             // Create and store the trip
             try {
                 Trip trip = new Trip(destination, duration, basePrice, client, transport, accommodation);
-                trips[tripCount++] = trip;
+                trips.add(trip);
             } catch (InvalidTripDataException ex) {
                 ErrorLogger.log("Invalid trip data: " + ex.getMessage());
                 throw ex;
@@ -158,8 +145,8 @@ public class SmartTravelService {
 
     public void deleteTrip(String tripId) throws EntityNotFoundException {
         int index = -1;
-        for (int i = 0; i < tripCount; i++) {
-            if (trips[i].getTripId().equals(tripId)) {
+        for (int i = 0; i < trips.size(); i++) {
+            if (trips.get(i).getTripId().equals(tripId)) {
                 index = i;
                 break;
             }
@@ -171,7 +158,7 @@ public class SmartTravelService {
         }
 
         // Remove associated transportation 
-        Transportation transport = trips[index].getTransportation();
+        Transportation transport = trips.get(index).getTransportation();
         if (transport != null) {
             try {
                 removeTransportation(transport.getTripId());
@@ -181,7 +168,7 @@ public class SmartTravelService {
         }
 
         // Remove associated accommodation 
-        Accommadation accommodation = trips[index].getAccommadation();
+        Accommadation accommodation = trips.get(index).getAccommadation();
         if (accommodation != null) {
             try {
                 removeAccommodation(accommodation.getAccommId());
@@ -189,22 +176,17 @@ public class SmartTravelService {
                 ErrorLogger.log("Error: Associated accommodation not found while deleting trip: " + ex.getMessage());
             }
         }
+        trips.remove(index);
 
-        // Shift trip array elements left
-        for (int i = index; i < tripCount - 1; i++) {
-            trips[i] = trips[i + 1];
-        }
-        trips[tripCount - 1] = null;
-        tripCount--;
     }
 
     
 
 
     public Accommadation findAccommodationById(String id) throws EntityNotFoundException {
-        for (int i = 0; i < accommadationCount; i++) {
-            if (accommadations[i].getAccommId().equals(id)) {
-                return accommadations[i];
+        for (int i = 0; i < accommadations.size(); i++) {
+            if (accommadations.get(i).getAccommId().equals(id)) {
+                return accommadations.get(i);
             }
         }
         EntityNotFoundException e = new EntityNotFoundException("Accommodation not found with ID: " + id);
@@ -213,16 +195,16 @@ public class SmartTravelService {
     }
 
     public boolean duplicateEmailCheck(String email){
-        for (int i=0;i<clientCount;i++){
-            if (clients[i].getEmailAddress().equalsIgnoreCase(email)){
+        for (int i=0;i<clients.size();i++){
+            if (clients.get(i).getEmailAddress().equalsIgnoreCase(email)){
                 return true;
             }
         }
         return false;
     }
     public boolean clientExists(String clientId) {
-        for (int i = 0; i < clientCount; i++) {
-            if (clients[i].getClientID().equals(clientId)) {
+        for (int i = 0; i < clients.size(); i++) {
+            if (clients.get(i).getClientID().equals(clientId)) {
                 return true;
             }
         }
@@ -230,9 +212,9 @@ public class SmartTravelService {
     }
 
     public Client findClientById(String id)throws EntityNotFoundException{
-        for (int i=0;i<clientCount;i++){
-            if (clients[i].getClientID().equals(id)){
-                return clients[i];
+        for (int i=0;i<clients.size();i++){
+            if (clients.get(i).getClientID().equals(id)){
+                return clients.get(i);
             }
         }
         EntityNotFoundException ex = new EntityNotFoundException("Client not found with ID: " + id);
@@ -243,6 +225,7 @@ public class SmartTravelService {
     //----------------------------------
     // LOAD ALL DATA 
     //----------------------------------
+    /* TODO LATER 
     public  void loadAllData() {
     // Reset counts to avoid mixing with existing data
     clientCount = 0;
@@ -270,10 +253,11 @@ public class SmartTravelService {
         ErrorLogger.log("Error loading data: " + ex.getMessage());
         
     }
-    }   
+    }   */
     //----------------------------------
     // SAVE ALL DATA 
     //----------------------------------
+    /*  TODO LATER 
         public  void saveAllData() {
         try {
             ClientFileManager.saveClients(clients, clientCount);
@@ -296,27 +280,24 @@ public class SmartTravelService {
             
         }
     }
+        */
     // used for dashboard 
     public double calculateTripTotal(int index) {
-    if (index < 0 || index >= tripCount) {
+    if (index < 0 || index >= trips.size()) {
         ErrorLogger.log("Invalid trip index: " + index);
         return 0.0;
     }
     try {
-        return trips[index].calculateTotalCost(trips[index].getDuration());
+        return trips.get(index).calculateTotalCost(trips.get(index).getDuration());
     } catch (InvalidAccommodationDataException ex) {
         ErrorLogger.log("Error calculating trip total for index " + index + ": " + ex.getMessage());
         return 0.0;
     }
     }
     // ---------- Getters ----------
-    public Client[] getClients() { return clients; }
-    public int getClientCount() { return clientCount; }
-    public Trip[] getTrips() { return trips; }
-    public int getTripCount() { return tripCount; }
-    public Transportation[] getTransportations() { return transportations; }
-    public int getTransportCount() { return transportCount; }
-    public Accommadation[] getAccommodations() { return accommadations; }
-    public int getAccommodationCount() { return accommadationCount; }
+    public List<Client> getClients() { return clients; }
+    public List<Trip>  getTrips() { return trips; }
+    public List<Transportation>  getTransportations() { return transportations; }
+    public List<Accommadation> getAccommodations() { return accommadations; }
     
 }

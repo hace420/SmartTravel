@@ -113,6 +113,13 @@ public boolean equals(Object obj) {
     }
 }
 
+   public String getType(){
+        return "FLIGHT";
+    }
+    public String getExtraCsvFields(){
+        return (";"+airlineName+";"+luggageAllowance+";"+ticketCost+";"+luggageCost);
+    }
+
 
 
 

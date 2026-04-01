@@ -96,5 +96,12 @@ public class Bus extends Transportation{
         else return false;
 
   }
+  public String getType(){
+        return "BUS";
+    }
+
+    public String getExtraCsvFields(){
+        return (";"+busCompany+";"+numberOfStops+";"+busCost);
+    }
     
 }

@@ -6,8 +6,10 @@
 package travel;
 
 import exceptions.InvalidAccommodationDataException;
+import interfaces.*;
+import persistence.ErrorLogger;
 
-public abstract  class Accommadation {
+public abstract  class Accommadation implements Identifiable, CsvPersistable{
     private static int nextId = 4001;
     final private String AccommId;
     private String name;
@@ -59,7 +61,7 @@ public abstract  class Accommadation {
     }
 
     // getters
-    public String getAccommId(){
+    public String getId(){
         return AccommId;
     }
     public String getName(){
@@ -102,6 +104,73 @@ public abstract  class Accommadation {
     public static void updateAccommId(int id){
         nextId = id;
     }
+    // csv persistable 
+
+    protected abstract String getType();
+
+    // base details of accommodation
+    public String baseCsvRow(){
+        return (this.getType()+";"+AccommId+";"+name+";"+location+";"+pricePerNight);
+
+    }
+    // subcvlasses add there extra fields
+    protected abstract String getExtraCsvFields();
+
+    // added both previous methods to create final csv row
+    public String toCsvRow(){
+        return baseCsvRow() + getExtraCsvFields();
+    }
+
+
+    public static Accommadation fromCsvRow(String csvline) throws InvalidAccommodationDataException {
+        String[] tokens = csvline.split(";");
+        if (tokens.length < 5) {
+            throw new InvalidAccommodationDataException("Invalid accommodation CSV line: " + csvline);
+        }
+        String type = tokens[0];
+        String accommId = tokens[1];
+        String name = tokens[2];
+        String location = tokens[3];
+
+        double price;
+        try {
+            price = Double.parseDouble(tokens[4]);
+        } catch (NumberFormatException ex) {
+            throw new InvalidAccommodationDataException("Invalid price in accommodation line: " + csvline);
+        }
+
+        if ("HOTEL".equals(type)) {
+            if (tokens.length != 7) {
+                throw new InvalidAccommodationDataException("Invalid Hotel CSV line (wrong field count): " + csvline);
+            }
+            double fees;
+            int stars;
+            try {
+                fees = Double.parseDouble(tokens[5]);
+                stars = Integer.parseInt(tokens[6]);
+            } catch (NumberFormatException ex) {
+                throw new InvalidAccommodationDataException("Invalid numeric data in Hotel line: " + csvline);
+            }
+            return new Hotel(accommId, name, location, price, stars, fees);
+
+        } else if ("HOSTEL".equals(type)) {
+            if (tokens.length != 7) {
+                throw new InvalidAccommodationDataException("Invalid Hostel CSV line (wrong field count): " + csvline);
+            }
+            double extraFees;
+            int beds;
+            try {
+                extraFees = Double.parseDouble(tokens[5]);
+                beds = Integer.parseInt(tokens[6]);
+            } catch (NumberFormatException ex) {
+                throw new InvalidAccommodationDataException("Invalid numeric data in Hostel line: " + csvline);
+            }
+            return new Hostel(accommId, name, location, price, beds, extraFees);
+
+        } else {
+            throw new InvalidAccommodationDataException("Unknown accommodation type: " + type);
+        }
+}
 
 
 

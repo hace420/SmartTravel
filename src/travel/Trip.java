@@ -6,9 +6,13 @@
 package travel;
 import client.Client;
 import exceptions.*;
+import interfaces.Billable;
+import interfaces.CsvPersistable;
+import interfaces.Identifiable;
+import persistence.ErrorLogger;
 
 
-public class Trip {
+public class Trip implements Identifiable, CsvPersistable, Billable, Comparable<Trip>{
 
   private static int nextId = 2001;
   final private String tripId;
@@ -18,6 +22,10 @@ public class Trip {
   private Client client;               
   private Transportation transportation;
   private Accommadation accommadation;
+  // used for loading csv lines storing id temporarelly until all list are fully loaded.
+  private transient String clientIdTemp;
+  private transient String transportIdTemp;
+  private transient String accommIdTemp;
 
   // constructors
   public Trip() {
@@ -87,7 +95,17 @@ public class Trip {
   }
 
   // getters
-  public String getTripId() {
+  public double getTotalCost(){
+    double cost =0;
+    try {
+       cost = this.calculateTotalCost(duration);
+    } catch (InvalidAccommodationDataException ex) {
+      ErrorLogger.log(ex.getMessage());
+    }
+    return cost;
+    
+  }
+  public String getId() {
     return tripId;
   }
 
@@ -241,11 +259,62 @@ public boolean equals(Object obj) {
   // used for dashboard
         public String getClientId(){
           if (client != null){
-            return client.getClientID();
+            return client.getId();
           } else {
             return "No Client can be found linked to this trip";
           }
         }
+
+  public String toCsvRow() {
+    return tripId + ";" +
+           (client != null ? client.getId() : "") + ";" +
+           (accommadation != null ? accommadation.getId() : "") + ";" +
+           (transportation != null ? transportation.getId() : "") + ";" +
+           destination + ";" +
+           duration + ";" +
+           basePrice;
+}
+  // Sets temporary IDs during loading (to be resolved later)
+    public void setReferenceIds(String clientId, String transportId, String accommodationId) {
+        this.clientIdTemp = clientId;
+        this.transportIdTemp = transportId;
+        this.accommIdTemp = accommodationId;
+    }
+
+  public static Trip fromCsvRow(String csvline)throws InvalidTripDataException{
+    String[] tokens = csvline.split(";");
+    if (tokens.length != 7){
+      throw new InvalidTripDataException("Invalid CSV format for trip(could be due to missing transportation or accommadation)"+csvline);
+    }
+    String tripId = tokens[0];
+    String clientId = tokens[1];
+    String accommodationId = tokens[2];
+    String transportId = tokens[3];
+    String destination = tokens[4];
+    
+    int duration=0;
+    double basePrice=0;
+      try {
+      duration = Integer.parseInt(tokens[5]);
+      basePrice = Double.parseDouble(tokens[6]);
+        } catch (NumberFormatException e) {
+          ErrorLogger.log("Invalid numeric data in trip line: " + csvline);
+          throw new InvalidTripDataException("Invalid numeric data in trip line: " + csvline);
+        }
+
+      Trip t = new Trip(tripId,destination,duration,basePrice,null,null,null);
+      t.setReferenceIds(clientId, transportId, accommodationId);
+      return t;       
+  }
+
+   public int compareTo(Trip other){
+   
+       return  Double.compare(other.getTotalCost(), this.getTotalCost());
+    
+   
+  }
+
+
 
 
 }

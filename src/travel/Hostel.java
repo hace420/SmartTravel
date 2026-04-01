@@ -85,6 +85,13 @@ public class Hostel extends Accommadation {
         else return false;
 
   }
+    public String getType(){
+        return "HOSTEL";
+    }
+
+    public String getExtraCsvFields(){
+        return (";"+fees+";"+numberOfBeds);
+    }
 
 
     

@@ -120,4 +120,12 @@ public class Train extends Transportation {
                this.seatClass == compare.seatClass &&
                this.trainType == compare.trainType;
     }
+
+    public String getType(){
+        return "TRAIN";
+    }
+    public String getExtraCsvFields(){
+        return (";"+trainType+";"+seatClass+";"+trainCost);
+    }
+
 }

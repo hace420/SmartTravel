@@ -82,6 +82,12 @@ public class Hotel extends Accommadation{
         else return false;
 
   }
+    public String getType(){
+        return "HOTEL";
+    }
+    public String getExtraCsvFields(){
+        return (";"+serviceFees+";"+numberOfStars);
+    }
 
 
 
