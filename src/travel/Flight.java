@@ -119,6 +119,10 @@ public boolean equals(Object obj) {
     public String getExtraCsvFields(){
         return (";"+airlineName+";"+luggageAllowance+";"+ticketCost+";"+luggageCost);
     }
+    @Override
+    public double getBasePrice(){
+        return ticketCost;
+    }
 
 
 

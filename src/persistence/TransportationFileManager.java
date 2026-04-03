@@ -21,18 +21,18 @@ public class TransportationFileManager {
 
                 if (t instanceof Bus) {
                     Bus b = (Bus) t;
-                    pw.println("BUS;" + b.getTripId() + ";" + b.getCompanyName() + ";" +
+                    pw.println("BUS;" + b.getId() + ";" + b.getCompanyName() + ";" +
                                b.getDepartureCity() + ";" + b.getArrivalCity() + ";" +
                                b.getBusCompany() + ";" + b.getNumberOfStops() + ";" + b.getBusCost());
                 } else if (t instanceof Flight) {
                     Flight f = (Flight) t;
-                    pw.println("FLIGHT;" + f.getTripId() + ";" + f.getCompanyName() + ";" +
+                    pw.println("FLIGHT;" + f.getId() + ";" + f.getCompanyName() + ";" +
                                f.getDepartureCity() + ";" + f.getArrivalCity() + ";" +
                                f.getAirlineName() + ";" + f.getLuggageAllowance() + ";" +
                                f.getTicketCost() + ";" + f.getLuggageCost());
                 } else if (t instanceof Train) {
                     Train tr = (Train) t;
-                    pw.println("TRAIN;" + tr.getTripId() + ";" + tr.getCompanyName() + ";" +
+                    pw.println("TRAIN;" + tr.getId() + ";" + tr.getCompanyName() + ";" +
                                tr.getDepartureCity() + ";" + tr.getArrivalCity() + ";" +
                                tr.getTrainType().name() + ";" + tr.getSeatClass().name() + ";" +
                                tr.getTrainCost());

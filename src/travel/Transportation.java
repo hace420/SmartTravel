@@ -10,7 +10,7 @@ import exceptions.*;
 import interfaces.CsvPersistable;
 import interfaces.Identifiable;
 
-public abstract class Transportation implements Identifiable, CsvPersistable{
+public abstract class Transportation implements Identifiable, CsvPersistable, Comparable<Transportation>{
 
   private static int nextId = 3001;
   final private String tripId;
@@ -118,6 +118,8 @@ public abstract class Transportation implements Identifiable, CsvPersistable{
   // csv persistency
   protected abstract String getType();
 
+  public abstract double getBasePrice();
+
 
   // base details of accommodation
   public String baseCsvRow(){
@@ -210,6 +212,14 @@ public abstract class Transportation implements Identifiable, CsvPersistable{
       }
 
     }
+
+    // comparable
+    public int compareTo(Transportation other){
+        return Double.compare(other.getBasePrice(), this.getBasePrice()); // only compares ticket costs no extras calculated
+        
+    
+   
+  }
 
 
 

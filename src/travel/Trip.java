@@ -128,6 +128,15 @@ public class Trip implements Identifiable, CsvPersistable, Billable, Comparable<
   public double getBasePrice(){
     return basePrice;
   }
+  public String getClientIdTemp(){
+    return clientIdTemp;
+  }
+  public String getTransportIdTemp(){
+    return transportIdTemp;
+  }
+  public String getAccommodationIdTemp(){
+    return accommIdTemp;
+  }
 
 
   // setters
@@ -303,7 +312,7 @@ public boolean equals(Object obj) {
         }
 
       Trip t = new Trip(tripId,destination,duration,basePrice,null,null,null);
-      t.setReferenceIds(clientId, transportId, accommodationId);
+      t.setReferenceIds(clientId, transportId, accommodationId); 
       return t;       
   }
 

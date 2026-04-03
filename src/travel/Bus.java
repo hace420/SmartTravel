@@ -19,7 +19,7 @@ public class Bus extends Transportation{
         busCost = 0;
     }
     public Bus(String companyName, String departureCity, String arrivalCity,String busCompany,int numberOfStops, double busCost) throws InvalidTransportDataException{
-        if (numberOfStops < 0) throw new InvalidTransportDataException("NUmber of stops must be equal to or greater than 1");
+        if (numberOfStops < 1) throw new InvalidTransportDataException("NUmber of stops must be equal to or greater than 1");
         super(companyName, departureCity, arrivalCity);
         this.numberOfStops = numberOfStops;
         this.busCompany = busCompany;
@@ -98,6 +98,10 @@ public class Bus extends Transportation{
   }
   public String getType(){
         return "BUS";
+    }
+    @Override
+    public double getBasePrice(){
+        return busCost;
     }
 
     public String getExtraCsvFields(){

@@ -127,5 +127,9 @@ public class Train extends Transportation {
     public String getExtraCsvFields(){
         return (";"+trainType+";"+seatClass+";"+trainCost);
     }
+    @Override
+    public double getBasePrice(){
+        return trainCost;
+    }
 
 }

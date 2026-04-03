@@ -36,7 +36,7 @@ public class TripFileManager {
                 }
                                      
 
-                pw.println(t.getTripId() + ";" + clientId + ";" + accommodationId + ";" + transportId + ";" +
+                pw.println(t.getId() + ";" + clientId + ";" + accommodationId + ";" + transportId + ";" +
                            t.getDestination() + ";" + t.getDuration() + ";" + t.getBasePrice());
             }
         }
@@ -134,42 +134,42 @@ public class TripFileManager {
     // ----- Helper methods -----
     private static String findClientId(Client client, Client[] clients, int clientCount) {
         for (int i = 0; i < clientCount; i++) {
-            if (clients[i] == client) return clients[i].getClientID();
+            if (clients[i] == client) return clients[i].getId();
         }
         return "null";
     }
 
     private static String findAccommodationId(Accommadation accommodation, Accommadation[] accommodations, int accommodationCount) {
         for (int i = 0; i < accommodationCount; i++) {
-            if (accommodations[i] == accommodation) return accommodations[i].getAccommId();
+            if (accommodations[i] == accommodation) return accommodations[i].getId();
         }
         return "null";
     }
 
     private static String findTransportId(Transportation transport, Transportation[] transports, int transportCount) {
         for (int i = 0; i < transportCount; i++) {
-            if (transports[i] == transport) return transports[i].getTripId();
+            if (transports[i] == transport) return transports[i].getId();
         }
         return "null";
     }
 
     private static Client findClientById(String id, Client[] clients, int clientCount) {
         for (int i = 0; i < clientCount; i++) {
-            if (clients[i].getClientID().equals(id)) return clients[i];
+            if (clients[i].getId().equals(id)) return clients[i];
         }
         return null;
     }
 
     private static Accommadation findAccommodationById(String id, Accommadation[] accommodations, int accommodationCount) {
         for (int i = 0; i < accommodationCount; i++) {
-            if (accommodations[i].getAccommId().equals(id)) return accommodations[i];
+            if (accommodations[i].getId().equals(id)) return accommodations[i];
         }
         return null;
     }
 
     private static Transportation findTransportById(String id, Transportation[] transports, int transportCount) {
         for (int i = 0; i < transportCount; i++) {
-            if (transports[i].getTripId().equals(id)) return transports[i];
+            if (transports[i].getId().equals(id)) return transports[i];
         }
         return null;
     }

@@ -7,9 +7,8 @@ package travel;
 
 import exceptions.InvalidAccommodationDataException;
 import interfaces.*;
-import persistence.ErrorLogger;
 
-public abstract  class Accommadation implements Identifiable, CsvPersistable{
+public abstract  class Accommadation implements Identifiable, CsvPersistable, Comparable<Accommadation>{
     private static int nextId = 4001;
     final private String AccommId;
     private String name;
@@ -170,7 +169,15 @@ public abstract  class Accommadation implements Identifiable, CsvPersistable{
         } else {
             throw new InvalidAccommodationDataException("Unknown accommodation type: " + type);
         }
-}
+    }
+
+    // comparable
+    public int compareTo(Accommadation other){
+        return Double.compare(other.pricePerNight, this.pricePerNight);
+        
+    
+   
+  }
 
 
 

@@ -164,7 +164,7 @@ public class Client implements Identifiable, CsvPersistable, Comparable<Client>{
     return totalSpent;
   }
   public void setTotalSpent(double s){
-    totalSpent =s;
+    totalSpent =s; 
   }
 
   // comparable 

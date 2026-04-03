@@ -61,9 +61,9 @@ public class TripChartGenerator {
         for (int i = 0; i < count; i++) {
             try {
                 double cost = trips[i].calculateTotalCost(trips[i].getDuration());
-                dataset.addValue(cost, "Total Cost", trips[i].getTripId());
+                dataset.addValue(cost, "Total Cost", trips[i].getId());
             } catch (InvalidAccommodationDataException e) {
-                System.err.println("Skipping trip " + trips[i].getTripId() + " due to invalid data: " + e.getMessage());
+                System.err.println("Skipping trip " + trips[i].getId() + " due to invalid data: " + e.getMessage());
             }
         }
 
@@ -103,7 +103,7 @@ public class TripChartGenerator {
     public static void generateDurationLineChart(Trip[] trips, int count) throws IOException {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (int i = 0; i < count; i++) {
-            dataset.addValue(trips[i].getDuration(), "Duration (days)", trips[i].getTripId());
+            dataset.addValue(trips[i].getDuration(), "Duration (days)", trips[i].getId());
         }
 
         JFreeChart chart = ChartFactory.createLineChart(

@@ -24,14 +24,14 @@ public class AccommodationFileManager {
                 if (a == null) continue;
                 if (a instanceof Hostel) {
                     pw.println(
-                        "HOSTEL;"+a.getAccommId()+";"+a.getName()+
+                        "HOSTEL;"+a.getId()+";"+a.getName()+
                         ";"+a.getLocation()+";"+a.getPricePerNight()+";"+((Hostel) a).getFees()+
                         ";"+((Hostel) a).getNumberOfBeds()
 
                     );
                 } else if (a instanceof Hotel){
                     pw.println(
-                        "HOTEL;"+a.getAccommId()+";"+a.getName()+
+                        "HOTEL;"+a.getId()+";"+a.getName()+
                         ";"+a.getLocation()+";"+a.getPricePerNight()+";"+((Hotel) a).getServiceFees()+
                         ";"+((Hotel) a).getNumberOfStars()
                     );

@@ -23,7 +23,7 @@ public class ClientFileManager {
 
             Client c = clients[i];
 
-            pw.println(c.getClientID() + ";" +c.getFirstName() + ";" +
+            pw.println(c.getId() + ";" +c.getFirstName() + ";" +
                        c.getLastName() + ";" +c.getEmailAddress());
         }
 
