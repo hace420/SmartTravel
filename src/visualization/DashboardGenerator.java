@@ -48,9 +48,9 @@ public class DashboardGenerator {
         new File("output").mkdirs();
         
         // 1. Generate charts FIRST (your existing code)
-        TripChartGenerator.generateCostBarChart(service.getTrips(),service.getTripCount());
-        TripChartGenerator.generateDestinationPieChart(service.getTrips(),service.getTripCount());
-        TripChartGenerator.generateDurationLineChart(service.getTrips(),service.getTripCount());
+        TripChartGenerator.generateCostBarChart(service.getTrips());
+        TripChartGenerator.generateDestinationPieChart(service.getTrips());
+        TripChartGenerator.generateDurationLineChart(service.getTrips());
         
         // 2. Generate HTML dashboard
         generateHTMLDashboard(service);
@@ -109,7 +109,7 @@ public class DashboardGenerator {
     private static void writeSummary(SmartTravelService service, PrintWriter out) {
         out.println("        <header>");
         out.println("            <h1>SmartTravel Dashboard</h1>");
-        out.println("            <p>A2: File I/O + Exceptions | " + 
+        out.println("            <p>A3 | " + 
                    service.getClientCount() + " Clients | " + service.getTripCount() + " Trips</p>");
         out.println("        </header>");
     }
@@ -132,13 +132,13 @@ public class DashboardGenerator {
         out.println("                </thead>");
         out.println("                <tbody>");
         
-        for (int i = 0; i < service.getClientCount(); i++) {
-            Client client = service.getClients()[i];
-            double spent = client.getTotalSpent(service.getTrips(),service.getTripCount());
+        for (Client c : service.getClients()) {
+            
+            double spent = c.getTotalSpent(service.getTrips());
             out.println("                    <tr>");
-            out.println("                        <td><strong>" + client.getClientID() + "</strong></td>");
-            out.println("                        <td>" + client.getFirstName() + " " + client.getLastName() + "</td>");
-            out.println("                        <td>" + client.getEmailAddress() + "</td>");
+            out.println("                        <td><strong>" + c.getId() + "</strong></td>");
+            out.println("                        <td>" + c.getFirstName() + " " + c.getLastName() + "</td>");
+            out.println("                        <td>" + c.getEmailAddress() + "</td>");
             out.println("                        <td style='font-weight: bold; color: " + 
                     								(spent > 3000 ? "#d32f2f" : "#388e3c") + ";'>" + 
                     										String.format("%,.2f", spent) + "</td>");
@@ -166,14 +166,14 @@ public class DashboardGenerator {
         out.println("                </thead>");
         out.println("                <tbody>");
         
-        for (int i = 0; i < service.getTripCount(); i++) {
-            Trip trip = service.getTrips()[i];
+        for (Trip t : service.getTrips()) {
+            
             out.println("                    <tr>");
-            out.println("                        <td><strong>" + trip.getTripId() + "</strong></td>");
-            out.println("                        <td>" + trip.getClientId() + "</td>");
-            out.println("                        <td>" + trip.getDestination() + "</td>");
-            out.println("                        <td>" + trip.getDuration() + "</td>");
-            out.println("                        <td>$" + String.format("%.2f", service.calculateTripTotal(i)) + "</td>");
+            out.println("                        <td><strong>" + t.getId() + "</strong></td>");
+            out.println("                        <td>" + t.getClientId() + "</td>");
+            out.println("                        <td>" + t.getDestination() + "</td>");
+            out.println("                        <td>" + t.getDuration() + "</td>");
+            out.println("                        <td>$" + String.format("%.2f", t.getTotalCost()) + "</td>");
             out.println("                    </tr>");
         }
         out.println("                </tbody>");
@@ -228,10 +228,10 @@ public class DashboardGenerator {
     	
         // 1. Total Revenue 
         double totalRevenue = 0.0;
-        Trip[] trips = service.getTrips();
-        for (int i=0;i<tripCount;i++){
+        
+        for (Trip t :service.getTrips()){
             try {
-                totalRevenue += trips[i].calculateTotalCost(trips[i].getDuration());  
+                totalRevenue += t.calculateTotalCost(t.getDuration());  
             } catch (InvalidAccommodationDataException ex) {
                 ErrorLogger.log(ex.getMessage());
             }
@@ -243,8 +243,8 @@ public class DashboardGenerator {
         
         // 2. total Duration (days)
         double totalDays = 0.0;
-        for (int i = 0; i < tripCount; i++) {
-            totalDays += trips[i].getDuration();
+        for (Trip t :service.getTrips()) {
+            totalDays += t.getDuration();
         }
         // Avg days
         double avgDuration = totalDays / tripCount;
@@ -317,7 +317,7 @@ public class DashboardGenerator {
      * Finds destination with most trips
      */
     private static String findMostVisitedDestination(SmartTravelService service) {
-        Trip[] trips = service.getTrips();
+        
         int count = service.getTripCount();
 
         // Arrays to store unique destinations and their counts
@@ -325,8 +325,8 @@ public class DashboardGenerator {
         int[] destCounts = new int[count]; 
         int uniqueCount = 0; // how many unique location has this method found
 
-        for (int i=0;i<count;i++){
-            String tempDestination = trips[i].getDestination();
+        for (Trip t : service.getTrips()){
+            String tempDestination = t.getDestination();
             boolean found= false;
 
             for (int q=0;q<uniqueCount;q++){
@@ -360,11 +360,11 @@ public class DashboardGenerator {
         return 0;
         }
 
-		Trip[] trips = service.getTrips();
-        int count = service.getTripCount();
+		
+        
         int counter = 0;
-        for (int i =0;i<count;i++){
-            if (trips[i].getDestination().equalsIgnoreCase(destination)){
+        for (Trip t : service.getTrips()){
+            if (t.getDestination().equalsIgnoreCase(destination)){
                 counter++;                
             }
             

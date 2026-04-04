@@ -9,6 +9,7 @@ import interfaces.*;
 import persistence.ErrorLogger;
 import travel.Trip;
 import exceptions.InvalidAccommodationDataException;
+import java.util.List;
 
 public class Client implements Identifiable, CsvPersistable, Comparable<Client>{
   private static int nextid = 1001;
@@ -178,13 +179,13 @@ public class Client implements Identifiable, CsvPersistable, Comparable<Client>{
     nextid = next;
 }
 // used for dahsboard creation
-    public double getTotalSpent(Trip[] allTrips, int tripCount) {
+    public double getTotalSpent(List<Trip> trips) {
             double total = 0.0;
-            for (int i = 0; i < tripCount; i++) {
-                Trip trip = allTrips[i];
-                if (trip.getClient().equals(this)) {   
+            for (Trip t:trips) {
+                
+                if (t.getClient().equals(this)) {   
                     try {
-                        total += trip.calculateTotalCost(trip.getDuration());
+                        total += t.calculateTotalCost(t.getDuration());
                     } catch (InvalidAccommodationDataException ex) {
                        ErrorLogger.log(ex.getMessage());
                     }

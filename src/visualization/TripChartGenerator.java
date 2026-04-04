@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
@@ -56,14 +57,14 @@ public class TripChartGenerator {
         }
     }
 
-    public static void generateCostBarChart(Trip[] trips, int count) throws IOException {
+    public static void generateCostBarChart(List<Trip> trips) throws IOException {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (int i = 0; i < count; i++) {
+        for (Trip t: trips) {
             try {
-                double cost = trips[i].calculateTotalCost(trips[i].getDuration());
-                dataset.addValue(cost, "Total Cost", trips[i].getId());
+                double cost = t.calculateTotalCost(t.getDuration());
+                dataset.addValue(cost, "Total Cost", t.getId());
             } catch (InvalidAccommodationDataException e) {
-                System.err.println("Skipping trip " + trips[i].getId() + " due to invalid data: " + e.getMessage());
+                System.err.println("Skipping trip " + t.getId() + " due to invalid data: " + e.getMessage());
             }
         }
 
@@ -77,10 +78,10 @@ public class TripChartGenerator {
         ChartUtils.saveChartAsPNG(new File("output/charts/trip_cost_bar_chart.png"), chart, 800, 600);
     }
 
-    public static void generateDestinationPieChart(Trip[] trips, int count) throws IOException {
+    public static void generateDestinationPieChart(List<Trip> trips) throws IOException {
         DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
-        for (int i = 0; i < count; i++) {
-            String destination = trips[i].getDestination();
+        for (Trip t :trips) {
+            String destination = t.getDestination();
             if (dataset.getIndex(destination) != -1) {
                 double value = dataset.getValue(destination).doubleValue();
                 dataset.setValue(destination, value + 1);
@@ -100,10 +101,10 @@ public class TripChartGenerator {
         ChartUtils.saveChartAsPNG(new File("output/charts/trips_per_destination_pie.png"), chart, 800, 600);
     }
 
-    public static void generateDurationLineChart(Trip[] trips, int count) throws IOException {
+    public static void generateDurationLineChart(List<Trip> trips) throws IOException {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (int i = 0; i < count; i++) {
-            dataset.addValue(trips[i].getDuration(), "Duration (days)", trips[i].getId());
+        for (Trip t:trips) {
+            dataset.addValue(t.getDuration(), "Duration (days)", t.getId());
         }
 
         JFreeChart chart = ChartFactory.createLineChart(

@@ -56,7 +56,6 @@ public class Trip implements Identifiable, CsvPersistable, Billable, Comparable<
   public Trip(String tripId,String destination, int duration, double basePrice, Client client,Transportation transportation, Accommadation accommadation) throws InvalidTripDataException{
     if (basePrice < 100.00) throw new InvalidTripDataException("Base price must be greater than or equal to 100.00$");
     if (duration < 1 || duration > 20) throw new InvalidTripDataException("Duration must be between 1-20 days");
-    if (client == null) throw new InvalidTripDataException("Client does not exist in system");
 
     this.destination = destination;
     this.duration = duration;
@@ -290,31 +289,28 @@ public boolean equals(Object obj) {
         this.accommIdTemp = accommodationId;
     }
 
-  public static Trip fromCsvRow(String csvline)throws InvalidTripDataException{
+  public static Trip fromCsvRow(String csvline) throws InvalidTripDataException {
     String[] tokens = csvline.split(";");
-    if (tokens.length != 7){
-      throw new InvalidTripDataException("Invalid CSV format for trip(could be due to missing transportation or accommadation)"+csvline);
+    if (tokens.length != 7) {
+        throw new InvalidTripDataException("Invalid CSV format for trip: " + csvline);
     }
     String tripId = tokens[0];
-    String clientId = tokens[1];
-    String accommodationId = tokens[2];
-    String transportId = tokens[3];
+    String clientId = "null".equals(tokens[1]) ? "" : tokens[1]; // checks if tokens[1] is null is so assignes "" if not then keeps original value passed in from csv file
+    String accommodationId = "null".equals(tokens[2]) ? "" : tokens[2];
+    String transportId = "null".equals(tokens[3]) ? "" : tokens[3];
     String destination = tokens[4];
-    
-    int duration=0;
-    double basePrice=0;
-      try {
-      duration = Integer.parseInt(tokens[5]);
-      basePrice = Double.parseDouble(tokens[6]);
-        } catch (NumberFormatException e) {
-          ErrorLogger.log("Invalid numeric data in trip line: " + csvline);
-          throw new InvalidTripDataException("Invalid numeric data in trip line: " + csvline);
-        }
-
-      Trip t = new Trip(tripId,destination,duration,basePrice,null,null,null);
-      t.setReferenceIds(clientId, transportId, accommodationId); 
-      return t;       
-  }
+    int duration;
+    double basePrice;
+    try {
+        duration = Integer.parseInt(tokens[5]);
+        basePrice = Double.parseDouble(tokens[6]);
+    } catch (NumberFormatException e) {
+        throw new InvalidTripDataException("Invalid numeric data in trip line: " + csvline);
+    }
+    Trip t = new Trip(tripId, destination, duration, basePrice, null, null, null);
+    t.setReferenceIds(clientId, transportId, accommodationId);
+    return t;
+}
 
    public int compareTo(Trip other){
    

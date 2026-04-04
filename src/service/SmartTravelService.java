@@ -250,7 +250,7 @@ public class SmartTravelService {
         transportations.addAll(loadedTransportations);
         int maxId3= 3000;
         for (Transportation t : transportations){
-            int num3 = Integer.parseInt(t.getId().substring(1)); 
+            int num3 = Integer.parseInt(t.getId().substring(2)); 
             if (num3 > maxId3){
                 maxId3 =num3;
             }
