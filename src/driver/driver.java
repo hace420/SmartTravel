@@ -1,10 +1,9 @@
 //------------------------------------------
-// Assignment (2)
+// Assignment (3)
 // Question: ()
 // Written by: (Christian Buckley 40329967)
 //------------------------------------------
 // Driver forSmart Travel program includs menu drien interface and testing scenario with hard coded values
-// Currently max size for any array in program in 50 
 package driver;
 import client.*;
 import exceptions.*;

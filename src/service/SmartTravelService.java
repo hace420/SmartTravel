@@ -1,5 +1,5 @@
 //------------------------------------------
-// Assignment (2)
+// Assignment (3)
 // Question: ()
 // Written by: (Christian Buckley 40329967)
 //------------------------------------------
@@ -214,7 +214,7 @@ public class SmartTravelService {
     //----------------------------------
      
     public  void loadAllData() {
-    // Reset counts to avoid mixing with existing data
+    // Reset counts 
     clients.clear();
     trips.clear();
     transportations.clear();

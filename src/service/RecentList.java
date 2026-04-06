@@ -1,3 +1,8 @@
+//------------------------------------------
+// Assignment 3)
+// Question: ()
+// Written by: (Christian Buckley 40329967)
+//------------------------------------------
 package service;
 import java.util.LinkedList;
 
@@ -9,7 +14,7 @@ public class RecentList <T>{
         if (item == null){
         System.out.println("Invalid entry!");return;
         } 
-        list.remove(item);
+        list.remove(item); // removes any duplicate entriess
         list.addFirst(item);
 
         // trims size incase it grows over 10 incase item is not duplicate 

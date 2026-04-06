@@ -18,3 +18,4 @@ NOTE:
 - all previous A2 operations untouched menu 5 options all still work.
 - original file manager files are still present and fucntionality remains 
 - dashboard and chart generator files have been modified to work with arrayList
+- Predefined test scenerio still works

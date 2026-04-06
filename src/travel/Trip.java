@@ -1,5 +1,5 @@
 //------------------------------------------
-// Assignment (2)
+// Assignment (3)
 // Question: ()
 // Written by: (Christian Buckley 40329967)
 //------------------------------------------
@@ -275,7 +275,7 @@ public boolean equals(Object obj) {
 
   public String toCsvRow() {
     return tripId + ";" +
-           (client != null ? client.getId() : "") + ";" +
+           (client != null ? client.getId() : "") + ";" + // shortend if else checks is client != null if yes returns client.getId if no then returns ""
            (accommadation != null ? accommadation.getId() : "") + ";" +
            (transportation != null ? transportation.getId() : "") + ";" +
            destination + ";" +
