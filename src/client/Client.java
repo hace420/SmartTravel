@@ -116,7 +116,7 @@ public class Client implements Identifiable, CsvPersistable, Comparable<Client>{
 
   @Override
   public String toString() {
-    return ("Client Id: " + clientID +
+    return ("\nClient Id: " + clientID +
         "\nFirst name: " + firstName +
         "\nLast name: " + lastName +
         "\nEmail Address: " + emailAddress);

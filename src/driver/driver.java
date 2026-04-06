@@ -1200,6 +1200,11 @@ public static void advancedMenu(Scanner in){
             System.out.println("Enter number of recent trips to show: ");
             int opt = in.nextInt();
             in.nextLine();
+
+            if (opt > service.getRecentTrips().size()){
+                System.out.println("There are only "+service.getRecentTrips().size()+" trips in the recent trip list");
+                break;
+            }
             service.getRecentTrips().printRecent(opt);      
             break;
         case 5:
